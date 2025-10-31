@@ -21,6 +21,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface DataTableLeaderboardProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -46,8 +48,8 @@ export function DataTableLeaderboard<TData, TValue>({
     })
 
     return (
-        <div className="pb-10">
-            <div className="flex items-center justify-between py-4">
+        <Card>
+            <CardHeader>
                 <Input
                     placeholder="Search username..."
                     value={
@@ -60,11 +62,12 @@ export function DataTableLeaderboard<TData, TValue>({
                             .getColumn("username")
                             ?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm ring-primary"
+                    className="ring-primary"
+                    containerClassName="w-full max-w-sm"
                 />
-            </div>
+            </CardHeader>
 
-            <div className="rounded-3xl border bg-white shadow">
+            <CardContent>
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -85,9 +88,7 @@ export function DataTableLeaderboard<TData, TValue>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    data-state={
-                                        row.getIsSelected() && "selected"
-                                    }
+                                    data-state={row.index === 0 && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -111,14 +112,15 @@ export function DataTableLeaderboard<TData, TValue>({
                         )}
                     </TableBody>
                 </Table>
-            </div>
+            </CardContent>
 
-            <div className="flex items-center justify-end space-x-2 py-4">
+            <CardFooter className="flex items-center justify-end gap-2">
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
+                    iconLeft={<ChevronLeft size={16} />}
                 >
                     Previous
                 </Button>
@@ -127,10 +129,11 @@ export function DataTableLeaderboard<TData, TValue>({
                     size="sm"
                     onClick={() => table.nextPage()}
                     disabled={!table.getCanNextPage()}
+                    iconRight={<ChevronRight size={16} />}
                 >
                     Next
                 </Button>
-            </div>
-        </div>
+            </CardFooter>
+        </Card>
     )
 }

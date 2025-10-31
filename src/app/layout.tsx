@@ -1,11 +1,16 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import Navbar from "@/components/Navbar"
+import Navbar from "@/components/navbar/Navbar"
 import { Toaster } from "@/components/ui/toaster"
 import { Providers } from "@/components/Providers"
+import { cn } from "@/lib/utils"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-inter",
+})
 
 export const metadata: Metadata = {
     title: "Quzuu - Quiz Platform",
@@ -19,12 +24,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body className={cn(inter.className, "min-h-screen bg-background")}>
                 <Providers>
-                    <div>
-                        <Navbar />
-                        {children}
-                    </div>
+                    {children}
                     <Toaster />
                 </Providers>
             </body>

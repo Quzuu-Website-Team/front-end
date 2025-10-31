@@ -48,10 +48,12 @@ const CheckboxAnswer: React.FC<CheckboxAnswerProps> = ({
         <div className="space-y-3">
             {options.map((option) => {
                 const isChosen = localSelected.includes(option.id)
-                let containerStyle = "bg-white border-slate-300"
+                let containerStyle =
+                    "bg-white border-slate-300 hover:bg-slate-100"
 
                 if (isChosen && !isReviewMode) {
-                    containerStyle = "bg-violet-100 border-violet-300"
+                    containerStyle =
+                        "bg-primary-100 border-primary-300 hover:bg-primary-200"
                 }
 
                 if (isReviewMode && isChosen) {
@@ -71,7 +73,7 @@ const CheckboxAnswer: React.FC<CheckboxAnswerProps> = ({
                             className={`flex items-center justify-center h-6 w-6 rounded-full border-2
                 ${
                     isChosen
-                        ? "border-secondary bg-secondary text-white"
+                        ? "border-primary bg-primary text-white"
                         : "border-slate-300"
                 }
               `}

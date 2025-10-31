@@ -37,7 +37,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
             if (idx === 1) return "bg-orange-500" // untuk nilai/assignment
             return "bg-blue-400" // default
         }
-        
+
         // Untuk review mode, gunakan warna berdasarkan benar/salah
         const isCorrect = correctAnswer[idx] === answers[idx]
         return isCorrect ? "bg-green-400" : "bg-red-400"
@@ -45,7 +45,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
 
     const getInputWidth = (idx: number) => {
         // Sesuaikan lebar berdasarkan konteks jawaban yang diharapkan
-        if (idx === 0) return "w-9"  // untuk "int" (3 karakter)
+        if (idx === 0) return "w-9" // untuk "int" (3 karakter)
         if (idx === 1) return "w-16" // untuk "= 3000" (6 karakter)
         return "w-16" // default
     }
@@ -62,7 +62,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
                     disabled={isReviewMode}
                     value={answers[0] || ""}
                     onChange={(e) => handleChange(e.target.value, 0)}
-                    className={`${getInputStyle(0)} text-slate-950 ${getInputWidth(0)} h-6 inline p-0 leading-3 focus:ring-transparent text-base border-0`}
+                    className={`${getInputStyle(0)} text-foreground ${getInputWidth(0)} h-6 inline p-0 leading-3 focus:ring-transparent text-base border-0`}
                     placeholder=""
                 />{" "}
                 jeruk = <span className="text-orange-500">2000</span>;
@@ -74,7 +74,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
                     disabled={isReviewMode}
                     value={answers[1] || ""}
                     onChange={(e) => handleChange(e.target.value, 1)}
-                    className={`${getInputStyle(1)} text-slate-950 ${getInputWidth(1)} h-6 inline p-0 leading-3 focus:ring-transparent text-base border-0`}
+                    className={`${getInputStyle(1)} text-foreground ${getInputWidth(1)} h-6 inline p-0 leading-3 focus:ring-transparent text-base border-0`}
                     placeholder=""
                 />
                 ;
