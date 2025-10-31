@@ -1,3 +1,4 @@
+import { EventData, EventListResponse } from "@/types/events"
 import axios, { AxiosError, AxiosResponse } from "axios"
 import Cookies from "js-cookie"
 
@@ -81,10 +82,10 @@ const handleApiResponse = <T>(response: AxiosResponse<any>): T => {
 // Helper to handle API errors
 const handleApiError = (error: any): never => {
     console.error("API Error Details:", error)
-    
+
     if (axios.isAxiosError(error) && error.response?.data) {
         console.error("API Error Response:", error.response.data)
-        
+
         if (error.response.data.status === "error") {
             throw new Error(error.response.data.message || "An error occurred")
         }
@@ -100,7 +101,10 @@ export const setAuthToken = (token: string): void => {
     if (typeof window !== "undefined") {
         console.log("🍪 Setting auth token in cookies (client-side)")
         Cookies.set(JWT_COOKIE_NAME, token, COOKIE_OPTIONS)
-        console.log("🍪 Token set successfully:", !!Cookies.get(JWT_COOKIE_NAME))
+        console.log(
+            "🍪 Token set successfully:",
+            !!Cookies.get(JWT_COOKIE_NAME),
+        )
     } else {
         console.warn("⚠️ setAuthToken called on server-side, skipping...")
     }
@@ -129,7 +133,7 @@ export const registerUser = async (
     password: string,
 ) => {
     try {
-        const response = await api.post("/auth/register", {
+        const response = await api.post("/authentication/register", {
             email,
             username,
             password,
@@ -142,15 +146,47 @@ export const registerUser = async (
 
 export const loginUser = async (email: string, password: string) => {
     try {
-        const response = await api.post("/auth/login", {
-            email,
+        const response = await api.post("/authentication/login", {
+            email_or_username: email,
             password,
         })
 
-        const data = handleApiResponse<{ account: any; token: string }>(response)
+        const data = handleApiResponse<{ account: any; token: string }>(
+            response,
+        )
 
         if (data.token) {
             setAuthToken(data.token)
+
+            // Set verification cookies for middleware
+            if (data.account) {
+                const isEmailVerified = data.account.is_email_verified || false
+                const isProfileComplete =
+                    data.account.is_detail_completed || false
+
+                Cookies.set(
+                    "quzuu_email_verified",
+                    isEmailVerified ? "true" : "false",
+                    {
+                        expires: 7,
+                        path: "/",
+                    },
+                )
+                Cookies.set(
+                    "quzuu_profile_complete",
+                    isProfileComplete ? "true" : "false",
+                    {
+                        expires: 7,
+                        path: "/",
+                    },
+                )
+
+                console.log("🍪 Login cookies set:", {
+                    token: "SET",
+                    emailVerified: isEmailVerified,
+                    profileComplete: isProfileComplete,
+                })
+            }
         }
 
         return data
@@ -174,7 +210,7 @@ export const externalLogin = async (
             is_sexual_disease,
         })
 
-        const response = await api.post("/auth/external-login", {
+        const response = await api.post("/authentication/external-login", {
             oauth_id,
             oauth_provider,
             is_agree_terms,
@@ -184,19 +220,18 @@ export const externalLogin = async (
         console.log("External login raw response:", response.data)
 
         const responseData = response.data
-        
+
         if (responseData.status === "success" && responseData.data) {
             const data = responseData.data
             console.log("External login processed data:", data)
 
             // DON'T set token here - this will be handled on client-side
             // The token will be stored via NextAuth session
-            
+
             return data
         } else {
             throw new Error(responseData.message || "External login failed")
         }
-
     } catch (error) {
         console.error("External login error:", error)
         return handleApiError(error)
@@ -225,7 +260,7 @@ export const changePassword = async (
     new_password: string,
 ) => {
     try {
-        const response = await api.put("/auth/change-password", {
+        const response = await api.put("/authentication/change-password", {
             old_password,
             new_password,
         })
@@ -237,7 +272,9 @@ export const changePassword = async (
 
 export const requestPasswordReset = async (email: string) => {
     try {
-        const response = await api.post("/auth/forgot-password", { email })
+        const response = await api.post("/authentication/forgot-password", {
+            email,
+        })
         return handleApiResponse(response)
     } catch (error) {
         return handleApiError(error)
@@ -246,7 +283,7 @@ export const requestPasswordReset = async (email: string) => {
 
 export const resetPassword = async (token: number, new_password: string) => {
     try {
-        const response = await api.put("/auth/forgot-password", {
+        const response = await api.put("/authentication/forgot-password", {
             token,
             new_password,
         })
@@ -293,7 +330,7 @@ export const verifyEmail = async (email: string, token: number | string) => {
 
 export const getUserProfile = async () => {
     try {
-        const response = await api.get("/user/me")
+        const response = await api.get("/account/me")
         return handleApiResponse(response)
     } catch (error) {
         return handleApiError(error)
@@ -306,18 +343,18 @@ export const updateUserProfile = async (profileData: UserProfileUpdateData) => {
         console.log("🔑 Using token:", getAuthToken()?.substring(0, 20) + "...")
 
         // Use the axios instance for consistency
-        const response = await api.put("/user/me", profileData)
+        const response = await api.put("/account/me", profileData)
 
         console.log("📨 Profile update raw response:", response.data)
 
         // Check if the response indicates success
         if (response.data && response.data.status === "success") {
             console.log("✅ Profile update successful!")
-            
+
             // Return the processed data
             const data = handleApiResponse(response)
             console.log("📊 Profile update processed data:", data)
-            
+
             return data
         } else if (response.data && response.data.status === "error") {
             console.error("❌ API returned error:", response.data.message)
@@ -330,7 +367,7 @@ export const updateUserProfile = async (profileData: UserProfileUpdateData) => {
         }
     } catch (error) {
         console.error("❌ Profile update error:", error)
-        
+
         // Enhanced error logging
         if (axios.isAxiosError(error)) {
             console.error("🔍 Axios error details:", {
@@ -340,7 +377,7 @@ export const updateUserProfile = async (profileData: UserProfileUpdateData) => {
                 headers: error.response?.headers,
             })
         }
-        
+
         return handleApiError(error)
     }
 }
@@ -368,7 +405,7 @@ export const checkProfileComplete = async () => {
 export const getEventList = async () => {
     try {
         const response = await api.get("/events", { data: {} })
-        return handleApiResponse(response)
+        return handleApiResponse<EventData[]>(response)
     } catch (error) {
         return handleApiError(error)
     }
@@ -391,10 +428,9 @@ export const getEventDetails = async (
     }
 }
 
-export const registerEvent = async (id_event: string, event_code: string) => {
+export const registerEvent = async (event_code: string) => {
     try {
         const response = await api.post("/events/register-event", {
-            id_event,
             event_code,
         })
         return handleApiResponse(response)

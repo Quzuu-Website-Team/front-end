@@ -1,6 +1,9 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
+import { Badge } from "@/components/ui/badge"
+import { formatDateTime } from "@/lib/date-utils"
+import { getEventStatus } from "@/lib/events/event-status"
 
 export type Events = {
     id_event: string
@@ -18,14 +21,38 @@ export const columns: ColumnDef<Events>[] = [
     {
         accessorKey: "start_event",
         header: "Start Date",
+        cell: ({ row }) => {
+            const date = row.getValue("start_event") as string
+            return (
+                <div className="flex flex-col">
+                    <span className="font-medium">{formatDateTime(date)}</span>
+                </div>
+            )
+        },
     },
     {
         accessorKey: "end_event",
         header: "End Date",
+        cell: ({ row }) => {
+            const date = row.getValue("end_event") as string
+            return (
+                <div className="flex flex-col">
+                    <span className="font-medium">{formatDateTime(date)}</span>
+                </div>
+            )
+        },
     },
+    {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) => {
+            const startDate = row.getValue("start_event") as string
+            const endDate = row.getValue("end_event") as string
+            const eventStatus = getEventStatus(startDate, endDate)
 
-    // {
-    //     accessorKey: "participant",
-    //     header: "Joined",
-    // },
+            return (
+                <Badge variant={eventStatus.variant}>{eventStatus.label}</Badge>
+            )
+        },
+    },
 ]

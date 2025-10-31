@@ -15,24 +15,16 @@ import {
 
 const CardPrivateEvent = () => {
     const [eventCode, setEventCode] = useState("")
-    const [eventId, setEventId] = useState("")
     const [loading, setLoading] = useState(false)
 
-    const handleEnroll = async () => {
+    const handleEnroll = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
         if (!eventCode.trim()) {
             toast({
                 variant: "destructive",
                 title: "Event code required",
                 description: "Please enter an event code to enroll",
-            })
-            return
-        }
-
-        if (!eventId.trim()) {
-            toast({
-                variant: "destructive",
-                title: "Event ID required",
-                description: "Please enter an event ID to enroll",
             })
             return
         }
@@ -47,9 +39,7 @@ const CardPrivateEvent = () => {
                 data?: any
             }
 
-            // Updated to pass string ID instead of number, per updated API
             const response = (await registerEvent(
-                eventId,
                 eventCode,
             )) as EventRegistrationResponse
 
@@ -62,7 +52,6 @@ const CardPrivateEvent = () => {
 
             // Clear the input fields after successful enrollment
             setEventCode("")
-            setEventId("")
         } catch (error: any) {
             toast({
                 variant: "destructive",
@@ -82,20 +71,21 @@ const CardPrivateEvent = () => {
                 <CardTitle>Join Private Event</CardTitle>
                 <CardDescription>Enter the Event Details</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-                <Input
-                    placeholder="Enter Event Code..."
-                    value={eventCode}
-                    onChange={(e) => setEventCode(e.target.value)}
-                    disabled={loading}
-                />
-                <Button
-                    className="w-full text-white"
-                    onClick={handleEnroll}
-                    disabled={loading || !eventCode.trim()}
-                >
-                    {loading ? "Enrolling..." : "Enroll"}
-                </Button>
+            <CardContent>
+                <form onSubmit={handleEnroll} className="flex flex-col gap-4">
+                    <Input
+                        placeholder="Enter Event Code..."
+                        value={eventCode}
+                        onChange={(e) => setEventCode(e.target.value)}
+                        disabled={loading}
+                    />
+                    <Button
+                        className="w-full text-white"
+                        disabled={loading || !eventCode.trim()}
+                    >
+                        {loading ? "Enrolling..." : "Enroll"}
+                    </Button>
+                </form>
             </CardContent>
         </Card>
     )
