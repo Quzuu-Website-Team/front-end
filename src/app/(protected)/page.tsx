@@ -14,49 +14,28 @@ export default function Home() {
     const [loading, setLoading] = useState<boolean>(true)
     const { user, isLoading: loadingUser } = useAuth()
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                // Define an interface for your event data structure
-                interface EventDataResponse {
-                    events?: any[]
-                    data?: any[]
-                }
+    const fetchEvents = async () => {
+        try {
+            const eventData = await getEventList()
+            console.log("eventData", eventData)
+            setData(eventData)
+        } catch (err: any) {
+            console.error("Error fetching events:", err)
+            setError(err.message || "Failed to fetch events.")
 
-                // Updated to work with the new API implementation
-                // The API now uses GET with data payload
-                const eventData = (await getEventList()) as
-                    | EventDataResponse
-                    | any[]
-
-                // Now TypeScript knows these properties exist
-                if (Array.isArray(eventData)) {
-                    // If API returns array directly
-                    setData(eventData)
-                } else if (eventData.events) {
-                    // If API returns object with events property
-                    setData(eventData.events)
-                } else {
-                    // If it's some other structure, try to adapt
-                    console.warn("Unexpected event data structure:", eventData)
-                    setData(Array.isArray(eventData.data) ? eventData.data : [])
-                }
-            } catch (err: any) {
-                console.error("Error fetching events:", err)
-                setError(err.message || "Failed to fetch events.")
-
-                toast({
-                    variant: "destructive",
-                    title: "Error fetching events",
-                    description:
-                        err.message ||
-                        "Failed to fetch events. Please try again later.",
-                })
-            } finally {
-                setLoading(false)
-            }
+            toast({
+                variant: "destructive",
+                title: "Error fetching events",
+                description:
+                    err.message ||
+                    "Failed to fetch events. Please try again later.",
+            })
+        } finally {
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         fetchEvents()
     }, [])
 

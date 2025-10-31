@@ -15,14 +15,14 @@ export default function NavbarMenu() {
     ]
 
     const pathname = usePathname()
-    
+
     const isActiveMenu = (path: string) => {
         if (path === "/") {
             return pathname === "/"
         }
         return pathname.startsWith(path)
     }
-    
+
     return (
         <ul className="max-md:w-full max-md:px-8 flex flex-col md:flex-row justify-center md:justify-end items-center gap-5 md:flex md:gap-0 md:bg-white rounded-full">
             {menus.map((item, idx) => (

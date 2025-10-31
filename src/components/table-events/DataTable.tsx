@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
 
 import {
     ColumnDef,
@@ -58,8 +57,6 @@ export function DataTable<TData, TValue>({
         },
     })
 
-    const router = useRouter()
-
     if (loading) {
         return (
             <Card className="col-span-2">
@@ -102,15 +99,11 @@ export function DataTable<TData, TValue>({
                                                 key={index}
                                                 className="hover:bg-violet-100 cursor-pointer"
                                             >
-                                                {columns.map(
-                                                    (column, colIndex) => (
-                                                        <TableCell
-                                                            key={colIndex}
-                                                        >
-                                                            <div className="h-4 w-20 animate-pulse rounded-md bg-slate-300"></div>
-                                                        </TableCell>
-                                                    ),
-                                                )}
+                                                {columns.map((_, colIndex) => (
+                                                    <TableCell key={colIndex}>
+                                                        <div className="h-4 w-20 animate-pulse rounded-md bg-slate-300"></div>
+                                                    </TableCell>
+                                                ))}
                                             </TableRow>
                                         ))}
                                 </TableBody>
@@ -180,7 +173,7 @@ export function DataTable<TData, TValue>({
                                         data-state={
                                             row.getIsSelected() && "selected"
                                         }
-                                        href="/event-details/1"
+                                        href={`/event-details/${(row.original as any).slug}`}
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id}>

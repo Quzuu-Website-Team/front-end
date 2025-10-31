@@ -26,9 +26,9 @@ const handler = NextAuth({
                     prompt: "consent",
                     access_type: "offline",
                     response_type: "code",
-                    scope: "openid email profile"
-                }
-            }
+                    scope: "openid email profile",
+                },
+            },
         }),
     ],
     session: {
@@ -37,7 +37,11 @@ const handler = NextAuth({
     callbacks: {
         async signIn({ user, account, profile }) {
             console.log("🔐 SignIn callback triggered")
-            console.log("👤 User:", { id: user.id, email: user.email, name: user.name })
+            console.log("👤 User:", {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+            })
             console.log("🔑 Account provider:", account?.provider)
 
             if (account?.provider === "google") {
@@ -48,31 +52,34 @@ const handler = NextAuth({
                         return false
                     }
 
-                    console.log("✅ ID token received, calling backend with oauth_id...")
+                    console.log(
+                        "✅ ID token received, calling backend with oauth_id...",
+                    )
 
                     // Call your backend API to handle OAuth login
                     const response = await externalLogin(
                         account.id_token, // Send id_token as oauth_id
                         "google",
                         true, // is_agree_terms
-                        false // is_sexual_disease
+                        false, // is_sexual_disease
                     )
-                    
+
                     console.log("✅ Backend OAuth response:", response)
-                    
+
                     // REMOVE setAuthToken from here - it won't work on server-side
                     // Instead, store the token data in the user object for JWT callback
                     user.backendToken = response.token
                     user.accountData = response.account
-                    
+
                     console.log("✅ User authentication data:", {
                         id: response.account.id,
                         email: response.account.email,
                         is_email_verified: response.account.is_email_verified,
-                        is_detail_completed: response.account.is_detail_completed,
-                        token_length: response.token.length
+                        is_detail_completed:
+                            response.account.is_detail_completed,
+                        token_length: response.token.length,
                     })
-                    
+
                     return true
                 } catch (error) {
                     console.error("❌ OAuth login failed:", error)
@@ -108,7 +115,7 @@ const handler = NextAuth({
         // This runs on client-side after successful sign in
         async signIn(message) {
             console.log("🎉 Client-side signIn event triggered")
-        }
+        },
     },
     debug: process.env.NODE_ENV === "development",
 })

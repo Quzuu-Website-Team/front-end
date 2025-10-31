@@ -18,15 +18,8 @@ import { useAuth } from "@/contexts/AuthContext"
 
 const UserDropdown: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false)
-    const [mounted, setMounted] = useState(false)
     const { user, isLoading, isAuthenticated, logout } = useAuth()
-    const router = useRouter()
     const dropdownRef = useRef<HTMLDivElement>(null)
-
-    // Prevent hydration mismatch
-    useEffect(() => {
-        setMounted(true)
-    }, [])
 
     useEffect(() => {
         // Close dropdown when clicking outside

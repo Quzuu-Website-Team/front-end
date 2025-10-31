@@ -56,10 +56,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true)
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [initializationComplete, setInitializationComplete] = useState(false)
-    
+
     const router = useRouter()
     const pathname = usePathname()
-    
+
     // Get NextAuth session
     const { data: session, status: sessionStatus } = useSession()
 
@@ -70,20 +70,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         initializationComplete,
         isAuthenticated,
-        userEmail: user?.email
+        userEmail: user?.email,
     })
 
     const setEmailVerified = (value: boolean) => {
+        console.log("📧 Setting email verified to:", value)
+
+        // Update cookie for middleware
+        if (value) {
+            Cookies.set("quzuu_email_verified", "true", {
+                expires: 7,
+                path: "/",
+            })
+        } else {
+            Cookies.remove("quzuu_email_verified", { path: "/" })
+        }
+
+        // Update user state
         if (user) {
             setUser({
                 ...user,
                 isEmailVerified: value,
             })
         }
+
+        console.log(
+            "✅ Email verified cookie set:",
+            Cookies.get("quzuu_email_verified"),
+        )
     }
 
     const setProfileComplete = (value: boolean) => {
         console.log("🔄 Setting profile complete to:", value)
+
+        // Update cookie for middleware
+        if (value) {
+            Cookies.set("quzuu_profile_complete", "true", {
+                expires: 7,
+                path: "/",
+            })
+        } else {
+            Cookies.remove("quzuu_profile_complete", { path: "/" })
+        }
+
+        // Update user state
         if (user) {
             const updatedUser = {
                 ...user,
@@ -94,6 +124,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
             console.warn("⚠️ No user found when trying to set profile complete")
         }
+
+        console.log(
+            "✅ Profile complete cookie set:",
+            Cookies.get("quzuu_profile_complete"),
+        )
     }
 
     // Function to parse JWT and extract data
@@ -126,49 +161,74 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         try {
             console.log("🔄 Processing OAuth session...")
-            
+
             const accountData = await syncNextAuthSession(session)
-            
+
             if (accountData) {
                 console.log("✅ OAuth session processed successfully")
-                
+
                 // Check localStorage for manual profile completion flag
-                const manualProfileComplete = localStorage.getItem("profile_completed") === "true"
-                const backendProfileComplete = accountData.is_detail_completed || false
-                
+                const manualProfileComplete =
+                    localStorage.getItem("profile_completed") === "true"
+                const backendProfileComplete =
+                    accountData.is_detail_completed || false
+
                 // Use manual flag if backend hasn't been updated yet
-                const finalProfileComplete = manualProfileComplete || backendProfileComplete
-                
+                const finalProfileComplete =
+                    manualProfileComplete || backendProfileComplete
+
+                const isEmailVerified = accountData.is_email_verified || false
+
                 console.log("🔍 Profile complete status:", {
                     backend: backendProfileComplete,
                     manual: manualProfileComplete,
-                    final: finalProfileComplete
+                    final: finalProfileComplete,
+                    emailVerified: isEmailVerified,
                 })
-                
+
+                // Set cookies for middleware to read
+                Cookies.set(
+                    "quzuu_email_verified",
+                    isEmailVerified ? "true" : "false",
+                    {
+                        expires: 7,
+                        path: "/",
+                    },
+                )
+                Cookies.set(
+                    "quzuu_profile_complete",
+                    finalProfileComplete ? "true" : "false",
+                    {
+                        expires: 7,
+                        path: "/",
+                    },
+                )
+
                 setUser({
                     id: accountData.id,
-                    username: accountData.username || session.user?.name || "User",
+                    username:
+                        accountData.username || session.user?.name || "User",
                     email: accountData.email || session.user?.email || "",
                     avatar: session.user?.image,
                     fullName: session.user?.name,
-                    isEmailVerified: accountData.is_email_verified || false,
+                    isEmailVerified: isEmailVerified,
                     isProfileComplete: finalProfileComplete,
                 })
-                
+
                 setIsAuthenticated(true)
                 return true
             }
         } catch (error) {
             console.error("❌ Failed to process OAuth session:", error)
         }
-        
+
         return false
     }
 
     // Handle regular authentication (email/password)
     const handleRegularAuth = async () => {
         const token = getAuthToken()
-        
+
         if (!token) {
             console.log("❌ No auth token found")
             setUser(null)
@@ -178,7 +238,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         try {
             console.log("🔄 Processing regular authentication...")
-            
+
             // Verify token before making API call
             const tokenData = parseJwt(token)
             const currentTime = Math.floor(Date.now() / 1000)
@@ -190,12 +250,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             // Make API call with valid token
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/me`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/account/me`,
                 {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token,
+                        Authorization: "Bearer " + token,
                     },
                 },
             )
@@ -212,6 +272,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                 console.log("✅ Regular auth processed successfully")
 
+                const isEmailVerified = account.is_email_verified || false
+                const isProfileComplete = account.is_detail_completed || false
+
+                // Set cookies for middleware to read
+                Cookies.set(
+                    "quzuu_email_verified",
+                    isEmailVerified ? "true" : "false",
+                    {
+                        expires: 7,
+                        path: "/",
+                    },
+                )
+                Cookies.set(
+                    "quzuu_profile_complete",
+                    isProfileComplete ? "true" : "false",
+                    {
+                        expires: 7,
+                        path: "/",
+                    },
+                )
+
                 setUser({
                     id: account.id,
                     username: account.username,
@@ -222,8 +303,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     province: details.province,
                     city: details.city,
                     phoneNumber: details.phone_number,
-                    isEmailVerified: account.is_email_verified || false,
-                    isProfileComplete: account.is_detail_completed || false,
+                    isEmailVerified: isEmailVerified,
+                    isProfileComplete: isProfileComplete,
                 })
 
                 setIsAuthenticated(true)
@@ -231,7 +312,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         } catch (error) {
             console.error("❌ Regular auth failed:", error)
-            
+
             if (
                 error instanceof Error &&
                 (error.message.includes("Token expired") ||
@@ -239,11 +320,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             ) {
                 // Clear expired token
                 removeAuthToken()
+                Cookies.remove("quzuu_email_verified", { path: "/" })
+                Cookies.remove("quzuu_profile_complete", { path: "/" })
                 setUser(null)
                 setIsAuthenticated(false)
             }
         }
-        
+
         return false
     }
 
@@ -251,7 +334,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const initializeAuth = async () => {
             console.log("🚀 Initializing authentication...")
-            
+
             // Wait for NextAuth to be ready
             if (sessionStatus === "loading") {
                 console.log("⏳ Waiting for NextAuth...")
@@ -259,7 +342,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
 
             setIsLoading(true)
-            
+
             try {
                 let authSuccess = false
 
@@ -279,7 +362,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setUser(null)
                     setIsAuthenticated(false)
                 }
-
             } catch (error) {
                 console.error("❌ Auth initialization failed:", error)
                 setUser(null)
@@ -298,18 +380,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const refreshUserData = async (): Promise<void> => {
         console.log("🔄 Refreshing user data...")
         setIsLoading(true)
-        
+
         try {
             let success = false
-            
+
             if (session?.backendToken) {
                 success = await handleOAuthSession(session)
             }
-            
+
             if (!success) {
                 success = await handleRegularAuth()
             }
-            
+
             if (!success) {
                 setUser(null)
                 setIsAuthenticated(false)
@@ -368,7 +450,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (user) {
             if (!user.isEmailVerified && !pathname.includes("/verify-email")) {
-                console.log("📧 Email not verified, redirecting to verify-email")
+                console.log(
+                    "📧 Email not verified, redirecting to verify-email",
+                )
                 router.push(
                     `/verify-email?email=${encodeURIComponent(user.email)}`,
                 )
@@ -380,19 +464,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 !user.isProfileComplete &&
                 pathname !== "/complete-profile"
             ) {
-                console.log("👤 Profile not complete, redirecting to complete-profile")
+                console.log(
+                    "👤 Profile not complete, redirecting to complete-profile",
+                )
                 router.push("/complete-profile")
                 return
             }
         }
-    }, [isAuthenticated, initializationComplete, isLoading, user, pathname, router])
+    }, [
+        isAuthenticated,
+        initializationComplete,
+        isLoading,
+        user,
+        pathname,
+        router,
+    ])
 
     const logout = async () => {
         try {
             console.log("🚪 Logging out...")
-            
+
             // Clear all auth data
             Cookies.remove("quzuu_auth_token", { path: "/" })
+            Cookies.remove("quzuu_email_verified", { path: "/" })
+            Cookies.remove("quzuu_profile_complete", { path: "/" })
             localStorage.removeItem("email_verified")
             localStorage.removeItem("profile_completed")
             setUser(null)
@@ -410,6 +505,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             // Force clear everything even if error
             Cookies.remove("quzuu_auth_token", { path: "/" })
+            Cookies.remove("quzuu_email_verified", { path: "/" })
+            Cookies.remove("quzuu_profile_complete", { path: "/" })
             localStorage.removeItem("email_verified")
             localStorage.removeItem("profile_completed")
             setUser(null)

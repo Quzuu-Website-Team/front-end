@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { Menu } from "lucide-react"
-import { usePathname } from "next/navigation"
 import UserDropdown from "./UserDropdown"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
@@ -12,26 +11,9 @@ import NavbarMenu from "./NavbarMenu"
 
 const Navbar: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false)
-    const [isMounted, setIsMounted] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
 
-    const pathname = usePathname()
-
-    // Path patterns that should not show navbar
-    const noNavbarPatterns = [
-        /^\/verify-email\/.+$/, // verify-email/[token]
-        /^\/reset-password\/.+$/, // reset-password/[token]
-    ]
-
-    // Check if the current path should hide navbar
-    const shouldHideNavbar = () => {
-        // if (noNavbarRoutes.includes(pathname)) return true
-        // return noNavbarPatterns.some((pattern) => pattern.test(pathname))
-    }
-
     useEffect(() => {
-        setIsMounted(true)
-
         const handleScroll = () => {
             if (window.scrollY > 40) {
                 setIsScrolled(true)
@@ -43,9 +25,6 @@ const Navbar: React.FC = () => {
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
-
-    // // Don't render anything during SSR
-    // if (!isMounted) return null
 
     return (
         <>
