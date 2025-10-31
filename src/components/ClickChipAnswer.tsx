@@ -20,7 +20,7 @@ interface ChipOption {
 const chipOptions: ChipOption[] = [
     { id: "1", content: "int", color: "bg-blue-400" },
     { id: "2", content: "= 2000;", color: "bg-orange-500" },
-    { id: "3", content: "+ 1000", color: "bg-green-400" }
+    { id: "3", content: "+ 1000", color: "bg-green-400" },
 ]
 
 const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
@@ -35,17 +35,21 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
     useEffect(() => {
         setSelectedChips(userSelected)
         // Map userSelected back to chip IDs for UI consistency
-        const chipIds = userSelected.map(selected => {
-            const chip = chipOptions.find(option => option.content === selected)
-            return chip ? chip.id : ""
-        }).filter(id => id !== "")
+        const chipIds = userSelected
+            .map((selected) => {
+                const chip = chipOptions.find(
+                    (option) => option.content === selected,
+                )
+                return chip ? chip.id : ""
+            })
+            .filter((id) => id !== "")
         setSelectedChipIds(chipIds)
     }, [userSelected])
 
     const handleSelectChip = (chipId: string) => {
         if (isReviewMode) return
 
-        const chip = chipOptions.find(option => option.id === chipId)
+        const chip = chipOptions.find((option) => option.id === chipId)
         if (!chip) return
 
         // Prevent selecting the same chip twice
@@ -53,7 +57,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
 
         const updatedIds = [...selectedChipIds, chipId]
         const updatedChips = [...selectedChips, chip.content]
-        
+
         setSelectedChipIds(updatedIds)
         setSelectedChips(updatedChips)
         onChange?.(updatedChips)
@@ -77,7 +81,9 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
 
         // Normal mode: use chip's original color if selected
         if (selectedChips[index]) {
-            const chip = chipOptions.find(option => option.content === selectedChips[index])
+            const chip = chipOptions.find(
+                (option) => option.content === selectedChips[index],
+            )
             return chip ? chip.color : "bg-slate-600"
         }
 
@@ -111,7 +117,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
                         disabled
                         value={selectedChips[0] || ""}
                         style={getInputStyle(0)}
-                        className={`w-8 focus-visible:ring-offset-0 disabled:opacity-100 disabled:cursor-default ${getInputColor(0)} text-slate-950 ${getInputWidth(0)} h-6 inline p-0 leading-3 focus:ring-transparent text-base border-0`}
+                        className={`w-8 focus-visible:ring-offset-0 disabled:opacity-100 disabled:cursor-default ${getInputColor(0)} text-foreground ${getInputWidth(0)} h-6 inline p-0 leading-3 focus:ring-transparent text-base border-0`}
                     />{" "}
                     jeruk = <span className="text-orange-500">2000</span>;
                 </code>
@@ -122,7 +128,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
                         disabled
                         value={selectedChips[1] || ""}
                         style={getInputStyle(1)}
-                        className={`w-8 focus-visible:ring-offset-0 disabled:opacity-100 disabled:cursor-default ${getInputColor(1)} text-slate-950 ${getInputWidth(1)} h-6 inline p-0 leading-3 focus:ring-transparent focus:outline-none text-base border-0`}
+                        className={`w-8 focus-visible:ring-offset-0 disabled:opacity-100 disabled:cursor-default ${getInputColor(1)} text-foreground ${getInputWidth(1)} h-6 inline p-0 leading-3 focus:ring-transparent focus:outline-none text-base border-0`}
                     />
                     ;
                 </code>
@@ -140,7 +146,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
                                     selectedChipIds.includes(chip.id)
                                         ? "invisible"
                                         : "visible"
-                                } text-slate-950 py-1 px-2 rounded-md cursor-pointer hover:opacity-80 transition-opacity`}
+                                } text-foreground py-1 px-2 rounded-md cursor-pointer hover:opacity-80 transition-opacity`}
                                 onClick={() => handleSelectChip(chip.id)}
                             >
                                 <code>{chip.content}</code>

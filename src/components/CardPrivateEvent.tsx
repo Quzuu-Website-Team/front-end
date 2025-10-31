@@ -5,6 +5,13 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { registerEvent } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "./ui/card"
 
 const CardPrivateEvent = () => {
     const [eventCode, setEventCode] = useState("")
@@ -70,36 +77,27 @@ const CardPrivateEvent = () => {
     }
 
     return (
-        <div className="bg-white p-6 rounded-3xl text-slate-800 shadow">
-            <h3 className="text-xl font-semibold">Join Private Event</h3>
-            <div className="text-base font-medium mb-3.5 text-slate-500">
-                Enter the Event Details
-            </div>
-            <div className="flex flex-col gap-4">
-                {/* <Input
-                    placeholder="Enter Event ID..."
-                    className="ring-primary"
-                    value={eventId}
-                    onChange={(e) => setEventId(e.target.value)}
-                    disabled={loading}
-                /> */}
+        <Card>
+            <CardHeader>
+                <CardTitle>Join Private Event</CardTitle>
+                <CardDescription>Enter the Event Details</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
                 <Input
                     placeholder="Enter Event Code..."
-                    className="ring-primary"
                     value={eventCode}
                     onChange={(e) => setEventCode(e.target.value)}
                     disabled={loading}
                 />
                 <Button
                     className="w-full text-white"
-                    variant={"secondary"}
                     onClick={handleEnroll}
-                    disabled={loading}
+                    disabled={loading || !eventCode.trim()}
                 >
                     {loading ? "Enrolling..." : "Enroll"}
                 </Button>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     )
 }
 

@@ -27,20 +27,20 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
         const checkSession = async () => {
             if (isLoading) {
                 const session = await getSession()
-                
+
                 if (session?.backendToken) {
                     console.log("🎉 Google OAuth successful!")
-                    
+
                     toast({
                         title: "Sign-in Successful",
                         description: "Welcome to Quzuu!",
                     })
-                    
+
                     setIsLoading(false)
-                    
+
                     // Call success callback if provided
                     onSuccess?.()
-                    
+
                     // Redirect after a short delay to allow AuthContext to sync
                     setTimeout(() => {
                         router.push(redirectTo)
@@ -51,16 +51,16 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
         // Check session periodically while loading
         const interval = setInterval(checkSession, 1000)
-        
+
         return () => clearInterval(interval)
     }, [isLoading, onSuccess, redirectTo, router])
 
     const handleGoogleSignIn = async () => {
         setIsLoading(true)
-        
+
         try {
             console.log("🔄 Starting Google OAuth...")
-            
+
             const result = await signIn("google", {
                 redirect: false, // Handle redirect manually for better control
                 callbackUrl: redirectTo,
@@ -70,42 +70,47 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
             if (result?.error) {
                 console.error("❌ Google sign-in error:", result.error)
-                
+
                 toast({
                     variant: "destructive",
                     title: "Sign-in Failed",
-                    description: result.error === "OAuthCallback" 
-                        ? "OAuth authentication failed. Please try again."
-                        : "Failed to sign in with Google. Please try again.",
+                    description:
+                        result.error === "OAuthCallback"
+                            ? "OAuth authentication failed. Please try again."
+                            : "Failed to sign in with Google. Please try again.",
                 })
-                
+
                 setIsLoading(false)
             } else if (result?.ok) {
                 console.log("✅ Google sign-in initiated successfully")
                 // Keep loading state - will be cleared by useEffect when session is ready
-                
+
                 // Set a timeout to prevent infinite loading
                 setTimeout(() => {
                     if (isLoading) {
-                        console.log("⏰ Sign-in timeout, stopping loading state")
+                        console.log(
+                            "⏰ Sign-in timeout, stopping loading state",
+                        )
                         setIsLoading(false)
                         toast({
                             variant: "destructive",
                             title: "Sign-in Timeout",
-                            description: "Sign-in is taking longer than expected. Please try again.",
+                            description:
+                                "Sign-in is taking longer than expected. Please try again.",
                         })
                     }
                 }, 30000) // 30 second timeout
             }
         } catch (error: any) {
             console.error("❌ Google sign-in error:", error)
-            
+
             toast({
                 variant: "destructive",
                 title: "Sign-in Failed",
-                description: error.message || "An error occurred during Google sign-in.",
+                description:
+                    error.message || "An error occurred during Google sign-in.",
             })
-            
+
             setIsLoading(false)
         }
     }

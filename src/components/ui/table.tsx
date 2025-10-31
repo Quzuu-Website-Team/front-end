@@ -1,4 +1,5 @@
 import * as React from "react"
+import Link from "next/link"
 
 import { cn } from "@/lib/utils"
 
@@ -6,7 +7,7 @@ const Table = React.forwardRef<
     HTMLTableElement,
     React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
+    <div className="relative w-full overflow-auto rounded-lg border shadow-sm">
         <table
             ref={ref}
             className={cn("w-full caption-bottom text-sm", className)}
@@ -51,19 +52,48 @@ const TableFooter = React.forwardRef<
 ))
 TableFooter.displayName = "TableFooter"
 
-const TableRow = React.forwardRef<
-    HTMLTableRowElement,
-    React.HTMLAttributes<HTMLTableRowElement>
->(({ className, ...props }, ref) => (
-    <tr
-        ref={ref}
-        className={cn(
-            "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-            className,
-        )}
-        {...props}
-    />
-))
+interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+    href?: string
+    navigable?: boolean
+}
+
+const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
+    ({ className, href, navigable = false, onClick, ...props }, ref) => {
+        const isNavigable = href && navigable
+
+        const handleClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
+            if (isNavigable && href) {
+                // Let Next.js Link handle the navigation
+                return
+            }
+            onClick?.(e)
+        }
+
+        const rowContent = (
+            <tr
+                ref={ref}
+                className={cn(
+                    "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-primary-50  data-[state=selected]:text-primary data-[state=selected]:font-semibold overflow-hidden",
+                    (isNavigable || onClick) &&
+                        "cursor-pointer hover:bg-primary-50",
+                    className,
+                )}
+                onClick={handleClick}
+                {...props}
+            />
+        )
+
+        if (isNavigable && href) {
+            return (
+                <Link href={href} className="contents">
+                    {rowContent}
+                </Link>
+            )
+        }
+
+        return rowContent
+    },
+)
 TableRow.displayName = "TableRow"
 
 const TableHead = React.forwardRef<

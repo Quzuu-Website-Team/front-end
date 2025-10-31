@@ -12,9 +12,7 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
     return (
         <SessionProvider>
-            <AuthProvider>
-                {children}
-            </AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
         </SessionProvider>
     )
 }

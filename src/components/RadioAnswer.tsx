@@ -40,9 +40,10 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
                 let isSelected = localSelected === option.id
                 let isCorrect = correctOption === option.id
 
-                let containerStyle = "bg-white border-slate-300"
+                let containerStyle =
+                    "bg-white border-slate-300 hover:bg-slate-100"
                 if (isSelected)
-                    containerStyle = "bg-violet-100 border-violet-300"
+                    containerStyle = "bg-primary-100 border-primary-300"
 
                 if (isReviewMode && isSelected) {
                     containerStyle = isCorrect
@@ -60,14 +61,14 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
                             className={`flex items-center justify-center h-6 w-6 rounded-full border-2 transition-all duration-200 
                 ${
                     isSelected
-                        ? "border-secondary bg-secondary text-white"
+                        ? "border-primary bg-primary text-white"
                         : "border-slate-300"
                 }
               `}
                         >
                             <span
-                                className={`text-sm font-semibold ${
-                                    isSelected ? "text-white" : "text-slate-300"
+                                className={`text-sm font-medium ${
+                                    isSelected ? "text-white" : "text-slate-400"
                                 }`}
                             >
                                 {option.order}
