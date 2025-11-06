@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
 import {
     ChevronDown,
     UserCircle,
@@ -99,20 +98,7 @@ const UserDropdown: React.FC = () => {
             return <UserCircle className="h-8 w-8 text-foreground" />
         }
 
-        if (src && src.includes("googleusercontent.com")) {
-            // Use regular img tag for Google avatars to avoid Next.js config issues
-            return (
-                <img
-                    src={src}
-                    alt={alt}
-                    width={size}
-                    height={size}
-                    className="rounded-full object-cover"
-                    onError={() => setImageError(true)}
-                />
-            )
-        } else if (src) {
-            // Use Next.js Image for other sources
+        if (src) {
             return (
                 <Image
                     src={src}
@@ -177,7 +163,7 @@ const UserDropdown: React.FC = () => {
                     {!user.isEmailVerified && (
                         <Link
                             href="/verify-email"
-                            className="block p-3 text-sm font-medium text-red-700 bg-red-50 border-b border-red-100 flex items-center hover:bg-red-100 transition-colors"
+                            className="flex p-3 text-sm font-medium text-red-700 bg-red-50 border-b border-red-100 items-center hover:bg-red-100 transition-colors"
                             onClick={() => setIsOpen(false)}
                         >
                             <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0 text-red-600" />
@@ -190,7 +176,7 @@ const UserDropdown: React.FC = () => {
                     {user.isEmailVerified && !user.isProfileComplete && (
                         <Link
                             href="/complete-profile"
-                            className="block p-3 text-sm font-medium text-yellow-700 bg-yellow-50 border-b border-yellow-100 flex items-center hover:bg-yellow-100 transition-colors"
+                            className="flex p-3 text-sm font-medium text-yellow-700 bg-yellow-50 border-b border-yellow-100 items-center hover:bg-yellow-100 transition-colors"
                             onClick={() => setIsOpen(false)}
                         >
                             <AlertCircle className="mr-2 h-4 w-4 flex-shrink-0 text-yellow-600" />

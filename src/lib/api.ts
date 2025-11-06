@@ -1,3 +1,4 @@
+import { Attempt } from "@/types/attempt"
 import { EventData, EventListResponse } from "@/types/events"
 import axios, { AxiosError, AxiosResponse } from "axios"
 import Cookies from "js-cookie"
@@ -490,6 +491,15 @@ export const getLeaderboard = async (quizId: string) => {
     try {
         const response = await api.get(`/quizzes/${quizId}/leaderboard`)
         return handleApiResponse(response)
+    } catch (error) {
+        return handleApiError(error)
+    }
+}
+
+export const attemptExam = async (attemptSlug: string) => {
+    try {
+        const response = await api.get(`/exam/attempt/${attemptSlug}`)
+        return handleApiResponse<Attempt>(response)
     } catch (error) {
         return handleApiError(error)
     }

@@ -1,100 +1,68 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useMemo, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
-import { getQuestions, submitExamAnswers } from "@/lib/api" // Updated import
+import { attemptExam, submitExamAnswers } from "@/lib/api"
 
-import RadioAnswer from "@/components/RadioAnswer"
-import CheckboxAnswer from "@/components/CheckboxAnswer"
-import ShortAnswer from "@/components/ShortAnswer"
-import ClickChipAnswer from "@/components/ClickChipAnswer"
-import CodeShortAnswer from "@/components/CodeShortAnswer"
-import FileAnswer from "@/components/FileAnswer"
-import TrueFalseAnswer from "@/components/TrueFalseAnswer"
-import CodeEditorAnswer from "@/components/CodeEditorAnswer"
+import RadioAnswer from "@/components/exam/RadioAnswer"
+import CheckboxAnswer from "@/components/exam/CheckboxAnswer"
+import ShortAnswer from "@/components/exam/ShortAnswer"
+import ClickChipAnswer from "@/components/exam/ClickChipAnswer"
+import CodeShortAnswer from "@/components/exam/CodeShortAnswer"
+import FileAnswer from "@/components/exam/FileAnswer"
+import TrueFalseAnswer from "@/components/exam/TrueFalseAnswer"
+import CodeEditorAnswer from "@/components/exam/CodeEditorAnswer"
 
 import NavQuiz from "./NavQuiz"
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa"
 import { Button } from "@/components/ui/button"
-import {
-    ChevronLeft,
-    ChevronLeftCircle,
-    ChevronRight,
-    ChevronRightCircle,
-} from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Attempt, Question } from "@/types/attempt"
+import LoadingQuiz from "./LoadingQuiz"
 
-type RadioOption = {
-    id: number
-    order: string
-    label: string
+type UserAnswers = Record<string, string[]>
+
+interface QuizState {
+    attempt: Attempt | null
+    userAnswers: UserAnswers
+    isSubmitting: boolean
+    isReviewMode: boolean
 }
 
-type CheckboxOption = {
-    id: number
-    order: string
-    label: string
-}
-
-interface Question {
-    id: number
-    question: string
-    type: string
-    options?: RadioOption[] | CheckboxOption[]
-    statements?: { id: number; statement: string }[]
-    correctAnswer?: any
-    correctAnswerText?: string
-    correctFileUrl?: string
-}
-
-type UserAnswers = Record<number, any>
-
-const QuizContainer: React.FC<{ examId?: string; problemsetId?: string }> = ({
-    examId = "",
-    problemsetId = "",
-}) => {
-    const [questions, setQuestions] = useState<Question[]>([])
-    const [userAnswers, setUserAnswers] = useState<UserAnswers>({})
-    const [isLoading, setIsLoading] = useState(true)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [isReviewMode, setIsReviewMode] = useState(false)
+const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [quizState, setQuizState] = useState<QuizState>({
+        attempt: null,
+        userAnswers: {},
+        isSubmitting: false,
+        isReviewMode: false,
+    })
 
     const searchParams = useSearchParams()
     const router = useRouter()
     const numberPage = searchParams.get("num")
+    const currentNumber = numberPage ? parseInt(numberPage, 10) : 1
 
+    // Fetch only runs ONCE when component mounts (slug-based fetch)
+    // searchParams change does NOT trigger re-fetch
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
-                // For development purposes, we'll still use the dummy data
-                // In production, this would be replaced with the API call
-                if (process.env.NODE_ENV === "development") {
-                    const res = await fetch("/dummyQuestions.json")
-                    const data: Question[] = await res.json()
-                    setQuestions(data)
-                } else {
-                    // // Use the API function in production
-                    // // Use problemsetId parameter for fetching questions
-                    // if (!problemsetId) {
-                    //     throw new Error(
-                    //         "Problem set ID is required to fetch questions",
-                    //     )
-                    // }
+                const res = await attemptExam(slug)
 
-                    // // Define an interface for the questions response
-                    // interface QuestionsResponse {
-                    //     questions?: any[] // Ideally define a more specific Question interface
-                    //     // Add other properties you expect in the response
-                    // }
-
-                    // const data = (await getQuestions(
-                    //     problemsetId,
-                    // )) as QuestionsResponse
-                    // setQuestions(data.questions || [])
-                    const res = await fetch("/dummyQuestions.json")
-                    const data: Question[] = await res.json()
-                    setQuestions(data)
+                const initialized: UserAnswers = {}
+                if (res?.questions) {
+                    res.questions.forEach((q) => {
+                        initialized[q.id] = q.current_answer ?? []
+                    })
                 }
+
+                setQuizState((prev) => ({
+                    ...prev,
+                    attempt: res,
+                    userAnswers: initialized,
+                }))
+                setIsLoading(false)
             } catch (error: any) {
                 console.error("Error fetching questions:", error)
                 toast({
@@ -102,73 +70,41 @@ const QuizContainer: React.FC<{ examId?: string; problemsetId?: string }> = ({
                     title: "Error fetching questions",
                     description: error.message || "Failed to load questions",
                 })
-            } finally {
                 setIsLoading(false)
             }
         }
 
         fetchQuestions()
-    }, [problemsetId])
+    }, [slug])
 
-    const handleUpdateAnswer = (questionId: number, answerValue: any) => {
-        setUserAnswers((prev) => ({
+    const handleUpdateAnswer = (questionId: string, answerValue: string[]) => {
+        setQuizState((prev) => ({
             ...prev,
-            [questionId]: answerValue,
+            userAnswers: {
+                ...prev.userAnswers,
+                [questionId]: answerValue,
+            },
         }))
     }
 
-    const handleSubmitAnswers = async () => {
-        setIsSubmitting(true)
+    const handleSubmitAnswers = useCallback(async () => {
+        setQuizState((prev) => ({ ...prev, isSubmitting: true }))
 
         try {
+            // Simulate delay for better UX
             await new Promise((r) => setTimeout(r, 1000))
-            setIsReviewMode(true)
+            setQuizState((prev) => ({
+                ...prev,
+                isSubmitting: false,
+                isReviewMode: true,
+            }))
 
             toast({
                 title: "Answers submitted",
                 description: "Your answers have been submitted successfully",
             })
-            // // In development mode, just simulate an API call
-            // if (process.env.NODE_ENV === "development") {
-            //     await new Promise((r) => setTimeout(r, 1000))
-            //     setIsReviewMode(true)
-
-            //     toast({
-            //         title: "Answers submitted",
-            //         description:
-            //             "Your answers have been submitted successfully",
-            //     })
-            // } else {
-            //     // In production mode, use the actual API
-            //     // Use examId for submitting answers
-            //     if (!examId) {
-            //         throw new Error("Exam ID is required to submit answers")
-            //     }
-
-            //     // Define an interface for the exam submission response
-            //     interface ExamSubmissionResponse {
-            //         message?: string
-            //         success?: boolean
-            //         score?: number
-            //         // Add other properties you expect in the response
-            //     }
-
-            //     // Using submitExamAnswers instead of submitQuizAnswers
-            //     const result = (await submitExamAnswers(
-            //         examId,
-            //         userAnswers,
-            //     )) as ExamSubmissionResponse
-
-            //     setIsReviewMode(true)
-
-            //     toast({
-            //         title: "Answers submitted",
-            //         description:
-            //             result.message ||
-            //             "Your answers have been submitted successfully",
-            //     })
-            // }
         } catch (error: any) {
+            setQuizState((prev) => ({ ...prev, isSubmitting: false }))
             toast({
                 variant: "destructive",
                 title: "Submission failed",
@@ -176,150 +112,121 @@ const QuizContainer: React.FC<{ examId?: string; problemsetId?: string }> = ({
                     error.message ||
                     "Failed to submit answers. Please try again.",
             })
-        } finally {
-            setIsSubmitting(false)
         }
-    }
+    }, [])
 
-    const renderQuestionByType = (question: Question) => {
-        const userAnswer = userAnswers[question.id]
+    const currentQuestion = useMemo(() => {
+        const question = quizState.attempt?.questions[currentNumber - 1]
+        if (!question) return null
 
-        switch (question.type) {
-            case "radio":
-                return (
-                    <RadioAnswer
-                        options={question.options || []}
-                        selectedOption={userAnswer}
-                        correctOption={question.correctAnswer}
-                        isReviewMode={isReviewMode}
-                        onSelectOption={(optionId) =>
-                            handleUpdateAnswer(question.id, optionId)
-                        }
-                    />
-                )
-            case "checkbox":
-                return (
-                    <CheckboxAnswer
-                        options={question.options || []}
-                        selectedOptions={userAnswer || []}
-                        correctOptions={question.correctAnswer || []}
-                        isReviewMode={isReviewMode}
-                        onChangeOption={(optionIds) =>
-                            handleUpdateAnswer(question.id, optionIds)
-                        }
-                    />
-                )
-            case "short":
-                return (
-                    <ShortAnswer
-                        userInput={userAnswer || ""}
-                        correctAnswerText={question.correctAnswerText || ""}
-                        isReviewMode={isReviewMode}
-                        onChange={(val) => handleUpdateAnswer(question.id, val)}
-                    />
-                )
-            case "clickchip":
-                return (
-                    <ClickChipAnswer
-                        correctAnswer={question.correctAnswer || []}
-                        userSelected={userAnswer || []}
-                        isReviewMode={isReviewMode}
-                        onChange={(val) => handleUpdateAnswer(question.id, val)}
-                    />
-                )
-            case "codeshort":
-                return (
-                    <CodeShortAnswer
-                        correctAnswer={question.correctAnswer || []}
-                        userSelected={userAnswer || []}
-                        isReviewMode={isReviewMode}
-                        onChange={(val) => handleUpdateAnswer(question.id, val)}
-                    />
-                )
-            case "file":
-                return (
-                    <FileAnswer
-                        userFileUrl={userAnswer || ""}
-                        correctFileUrl={question.correctFileUrl || ""}
-                        isReviewMode={isReviewMode}
-                        onFileChange={(fileUrl) =>
-                            handleUpdateAnswer(question.id, fileUrl)
-                        }
-                    />
-                )
-            case "truefalse":
-                return (
-                    <TrueFalseAnswer
-                        statements={question.statements || []}
-                        correctAnswer={question.correctAnswer || {}}
-                        userAnswers={userAnswer || {}}
-                        isReviewMode={isReviewMode}
-                        onChange={(updatedObj) =>
-                            handleUpdateAnswer(question.id, updatedObj)
-                        }
-                    />
-                )
-            case "codeeditor":
-                return (
-                    <CodeEditorAnswer
-                        userCode={userAnswer || ""}
-                        isReviewMode={isReviewMode}
-                        onCodeChange={(code) =>
-                            handleUpdateAnswer(question.id, code)
-                        }
-                    />
-                )
-            default:
-                return <div>Tipe soal tidak dikenali</div>
+        // Create a new question object with updated current_answer from userAnswers
+        return {
+            ...question,
+            current_answer:
+                quizState.userAnswers[question.id] ??
+                question.current_answer ??
+                [],
         }
-    }
+    }, [quizState.attempt?.questions, currentNumber, quizState.userAnswers])
 
-    if (isLoading) return <div>Loading questions...</div>
+    const handleNavigate = useCallback(
+        (direction: "prev" | "next") => {
+            if (direction === "prev" && currentNumber > 1) {
+                router.push(
+                    `/event-details/1/start/${slug}?num=${currentNumber - 1}`,
+                )
+            }
+            if (
+                direction === "next" &&
+                currentNumber < (quizState.attempt?.questions?.length || 0)
+            ) {
+                router.push(
+                    `/event-details/1/start/${slug}?num=${currentNumber + 1}`,
+                )
+            }
+        },
+        [currentNumber, slug, quizState.attempt?.questions?.length, router],
+    )
 
-    const currentNumber = numberPage ? parseInt(numberPage, 10) : 1
-    const currentQuestion = questions.find((q) => q.id === currentNumber)
+    const renderQuestionByType = useCallback(
+        (question: Question) => {
+            const handleAnswerChange = (answer: string[]) => {
+                handleUpdateAnswer(question.id, answer)
+            }
+
+            const commonProps = {
+                question,
+                isReviewMode: quizState.isReviewMode,
+                onAnswerChange: handleAnswerChange,
+            }
+
+            switch (question.question_type) {
+                case "choice":
+                    return <RadioAnswer {...commonProps} />
+                case "multiple_choice":
+                    return <CheckboxAnswer {...commonProps} />
+                case "short_answer":
+                    return <ShortAnswer {...commonProps} />
+                case "code_puzzle":
+                    if (question.options && question.options.length > 0) {
+                        return <ClickChipAnswer {...commonProps} />
+                    }
+                    return <CodeShortAnswer {...commonProps} />
+                case "upload_file":
+                    return <FileAnswer {...commonProps} />
+                case "true_false_choice":
+                    return <TrueFalseAnswer {...commonProps} />
+                case "competitive_programming":
+                    return <CodeEditorAnswer {...commonProps} />
+                default:
+                    return (
+                        <div>
+                            Tipe soal tidak dikenali: {question.question_type}
+                        </div>
+                    )
+            }
+        },
+        [quizState.isReviewMode, handleUpdateAnswer],
+    )
+
+    const MemoizedQuestionComponent = useMemo(() => {
+        if (!currentQuestion) return null
+        return renderQuestionByType(currentQuestion)
+    }, [currentQuestion, renderQuestionByType])
+
+    if (isLoading) return <LoadingQuiz />
 
     if (!currentQuestion) {
         return <div>Tidak ada soal untuk nomor {currentNumber}</div>
     }
 
-    const handleNavigate = (direction: "prev" | "next") => {
-        if (direction === "prev" && currentNumber > 1) {
-            router.push(
-                `/event-details/1/start/analitika?num=${currentNumber - 1}`,
-            )
-        }
-        if (direction === "next" && currentNumber < questions.length) {
-            router.push(
-                `/event-details/1/start/analitika?num=${currentNumber + 1}`,
-            )
-        }
-    }
-
     return (
         <div className="pb-10 grid grid-cols-1 lg:grid-cols-3 gap-y-8 lg:gap-x-8">
             <NavQuiz
-                totalQuestions={questions.length}
-                basePath="/event-details/1/start/analitika"
-                isReviewMode={isReviewMode}
+                totalQuestions={quizState.attempt?.questions?.length || 0}
+                basePath={`/event-details/1/start/${slug}`}
+                isReviewMode={quizState.isReviewMode}
                 onSubmitAnswers={handleSubmitAnswers}
+                userAnswers={quizState.userAnswers}
+                questions={quizState.attempt?.questions || []}
             />
 
             <div className="display-quiz col-span-2 bg-white p-9 rounded-3xl text-slate-800 shadow flex flex-col gap-4">
-                {/* <h1 className="text-2xl underline mb-8">
-                    # Question {currentQuestion.id}
-                </h1> */}
                 <div>
-                    <span className="width-fit rounded-full font-bold bg-tertiary text-white p-2.5">
-                        Question {currentQuestion.id}
+                    <span className="width-fit rounded-full font-bold bg-primary text-white p-2.5">
+                        Question {currentNumber}
                     </span>
                 </div>
 
-                <p className="text-base">{currentQuestion.question}</p>
+                {currentQuestion.question_type !== "code_puzzle" &&
+                    currentQuestion.question_type !==
+                        "competitive_programming" && (
+                        <p className="text-base">{currentQuestion.content}</p>
+                    )}
 
-                {renderQuestionByType(currentQuestion)}
+                {MemoizedQuestionComponent}
 
-                {isReviewMode && (
+                {quizState.isReviewMode && (
                     <div className="p-4 bg-yellow-50 border border-yellow-300 rounded">
                         <p className="text-yellow-600 font-semibold">
                             Anda sudah submit jawaban. Hasil di atas adalah
@@ -328,23 +235,23 @@ const QuizContainer: React.FC<{ examId?: string; problemsetId?: string }> = ({
                     </div>
                 )}
 
-                <div className="mt-auto flex justify-between">
+                <div className="mt-auto flex justify-between gap-4">
                     {currentNumber > 1 && (
                         <Button
                             onClick={() => handleNavigate("prev")}
-                            disabled={isSubmitting}
+                            disabled={quizState.isSubmitting}
                             iconLeft={<ChevronLeft size={20} />}
-                            variant="primary-outline"
-                            className="mr-auto"
+                            variant="outline"
                         >
                             Back
                         </Button>
                     )}
-                    {currentNumber < questions.length && (
+                    {currentNumber <
+                        (quizState.attempt?.questions?.length || 0) && (
                         <Button
                             onClick={() => handleNavigate("next")}
-                            disabled={isSubmitting}
-                            variant="primary-outline"
+                            disabled={quizState.isSubmitting}
+                            variant="outline"
                             className="ml-auto"
                             iconRight={<ChevronRight size={20} />}
                         >
