@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 
-const Countdown: React.FC = () => {
-    const [timeLeft, setTimeLeft] = useState<number>(2 * 60 * 60)
+const Countdown = ({ initialTime = 7200 }: { initialTime?: number }) => {
+    const [timeLeft, setTimeLeft] = useState<number>(initialTime)
 
     useEffect(() => {
         if (timeLeft <= 0) return

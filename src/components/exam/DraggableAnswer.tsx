@@ -12,7 +12,7 @@ const initialAnswers = [
     { id: "3", content: "int anggur = 1500;" },
 ]
 
-const DraggableAnser: React.FC = () => {
+const DraggableAnswer: React.FC = () => {
     const [answers, setAnswers] = React.useState(initialAnswers)
 
     const handleOnDragEnd = (result: any) => {
@@ -24,7 +24,6 @@ const DraggableAnser: React.FC = () => {
 
         setAnswers(items)
     }
-    console.log("CHECK", answers)
 
     return (
         <div className="p-5 bg-gray-800 rounded-lg">
@@ -57,26 +56,11 @@ total_harga = apel + jeruk + anggur;`}
                     {(provided) => (
                         <div
                             className="flex space-x-4"
-                            id="drag-here"
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                         >
-                            {/* {answers.map(({ id, content }, index) => (
-                <Draggable key={id} draggableId={id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="bg-blue-600 text-white p-2 rounded-lg"
-                    >
-                      {content}
-                    </div>
-                  )}
-                </Draggable>
-              ))} */}
                             <Draggable draggableId="draggable-1" index={0}>
-                                {(provided, snapshot) => (
+                                {(provided) => (
                                     <div
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
@@ -97,4 +81,4 @@ total_harga = apel + jeruk + anggur;`}
     )
 }
 
-export default DraggableAnser
+export default DraggableAnswer
