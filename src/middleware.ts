@@ -10,6 +10,7 @@ const protectedRoutes = [
     "/achievements",
     "/complete-profile",
     "/event-details",
+    "/verify-email",
 ]
 
 // Auth routes (accessible only when NOT authenticated)
@@ -18,7 +19,6 @@ const authRoutes = [
     "/register",
     "/forgot-password",
     "/reset-password",
-    "/verify-email",
 ]
 
 export function middleware(request: NextRequest) {
