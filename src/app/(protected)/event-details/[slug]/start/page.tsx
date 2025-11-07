@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import styles from "./start.module.css"
 import { usePathname } from "next/navigation"
-import SectionQuiz from "@/app/(protected)/event-details/[id]/containers/SectionQuiz"
+import SectionQuiz from "@/app/(protected)/event-details/[slug]/containers/SectionQuiz"
 import Link from "next/link"
 
 interface SectionData {

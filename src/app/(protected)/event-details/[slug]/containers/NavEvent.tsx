@@ -6,27 +6,26 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-const NavEvent = () => {
+const NavEvent = ({ slug }: { slug: string }) => {
     const pathname = usePathname()
-    const eventId = "1" // TODO: Get from params or props
 
     const menuItems = [
         {
-            href: `/event-details/${eventId}`,
+            href: `/event-details/${slug}`,
             label: "Overview",
             exact: true,
         },
         {
-            href: `/event-details/${eventId}/start`,
+            href: `/event-details/${slug}/start`,
             label: "Start The Quiz",
             highlight: true,
         },
         {
-            href: `/event-details/${eventId}/announcement`,
+            href: `/event-details/${slug}/announcement`,
             label: "Announcement",
         },
         {
-            href: `/event-details/${eventId}/scoreboard`,
+            href: `/event-details/${slug}/scoreboard`,
             label: "Scoreboard",
         },
     ]
@@ -58,7 +57,7 @@ const NavEvent = () => {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "block w-full py-1.5 px-12 rounded-full transition-colors",
+                                "block w-full py-1.5 px-4 xl:px-12 rounded-full transition-colors",
                                 active
                                     ? "bg-primary text-white"
                                     : item.highlight

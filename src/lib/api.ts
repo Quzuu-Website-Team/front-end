@@ -1,4 +1,4 @@
-import { Attempt } from "@/types/attempt"
+import { AnswerAttemptResponse, Attempt } from "@/types/attempt"
 import { EventData, EventListResponse } from "@/types/events"
 import axios, { AxiosError, AxiosResponse } from "axios"
 import Cookies from "js-cookie"
@@ -475,18 +475,6 @@ export const startExam = async (id_problemset: string) => {
     }
 }
 
-export const submitExamAnswers = async (
-    id_exam: string,
-    answers: Record<string, any>,
-) => {
-    try {
-        const response = await api.post(`/exam/${id_exam}/submit`, { answers })
-        return handleApiResponse(response)
-    } catch (error) {
-        return handleApiError(error)
-    }
-}
-
 export const getLeaderboard = async (quizId: string) => {
     try {
         const response = await api.get(`/quizzes/${quizId}/leaderboard`)
@@ -500,6 +488,66 @@ export const attemptExam = async (attemptSlug: string) => {
     try {
         const response = await api.get(`/exam/attempt/${attemptSlug}`)
         return handleApiResponse<Attempt>(response)
+    } catch (error) {
+        return handleApiError(error)
+    }
+}
+
+export const postAnswerQuestion = async (
+    idAttempt: string,
+    questionId: string,
+    answer: string[],
+): Promise<AnswerAttemptResponse> => {
+    try {
+        const response = await api.post(`/exam/answer_question/${idAttempt}`, {
+            questionId,
+            answer,
+        })
+        return {
+            message: response.data?.message || "",
+            meta_data: response.data?.meta_data || null,
+        }
+    } catch (error) {
+        return handleApiError(error)
+    }
+}
+
+export const postAnswerQuestionFile = async (
+    idAttempt: string,
+    questionId: string,
+    file: File,
+): Promise<AnswerAttemptResponse> => {
+    try {
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("questionId", questionId)
+
+        const response = await api.post(
+            `/exam/answer_question/${idAttempt}`,
+            formData,
+            {
+                headers: { "Content-Type": "multipart/form-data" },
+            },
+        )
+
+        return {
+            message: response.data?.message || "",
+            meta_data: response.data?.meta_data || null,
+        }
+    } catch (error) {
+        return handleApiError(error)
+    }
+}
+
+export const submitAnswerQuestion = async (
+    attemptId: string,
+): Promise<AnswerAttemptResponse> => {
+    try {
+        const response = await api.post(`/exam/submit/${attemptId}`)
+        return {
+            message: response.data?.message || "",
+            meta_data: response.data?.meta_data || null,
+        }
     } catch (error) {
         return handleApiError(error)
     }

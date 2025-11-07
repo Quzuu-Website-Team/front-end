@@ -34,7 +34,7 @@ const ShortAnswer: React.FC<ShortAnswerProps> = ({
 
     const isCorrect =
         localInput.trim().toLowerCase() ===
-        (question.correctAnswer?.[0] ?? "").trim().toLowerCase()
+        (question.correct_answer?.[0] ?? "").trim().toLowerCase()
 
     const inputStyle = isReviewMode
         ? isCorrect
@@ -66,11 +66,11 @@ const ShortAnswer: React.FC<ShortAnswerProps> = ({
                             {localInput || "-"}
                         </span>
                     </div>
-                    {!isCorrect && question.correctAnswer?.[0] && (
+                    {!isCorrect && question.correct_answer?.[0] && (
                         <div className="flex items-center gap-2">
                             <span className="font-medium">Correct Answer:</span>
                             <span className="text-green-600">
-                                {question.correctAnswer[0]}
+                                {question.correct_answer[0]}
                             </span>
                         </div>
                     )}

@@ -24,28 +24,28 @@ const convertSelectedChipsToArray = (
 
 const areAnswersCorrect = (
     selectedChips: Record<number, string>,
-    correctAnswer: string[],
+    correct_answer: string[],
     blankCount: number,
 ): boolean => {
     const answersArray: string[] = []
     for (let i = 0; i < blankCount; i++) {
         if (selectedChips[i]) answersArray.push(selectedChips[i])
     }
-    if (answersArray.length !== correctAnswer.length) return false
-    return answersArray.every((answer, idx) => answer === correctAnswer[idx])
+    if (answersArray.length !== correct_answer.length) return false
+    return answersArray.every((answer, idx) => answer === correct_answer[idx])
 }
 
 type ReviewResultProps = {
     selectedChips: Record<number, string>
-    correctAnswer: string[]
+    correct_answer: string[]
     blankCount: number
 }
 
 const ReviewResult = memo<ReviewResultProps>(
-    ({ selectedChips, correctAnswer, blankCount }) => {
+    ({ selectedChips, correct_answer, blankCount }) => {
         const isCorrect = areAnswersCorrect(
             selectedChips,
-            correctAnswer,
+            correct_answer,
             blankCount,
         )
         const answersArray = convertSelectedChipsToArray(
@@ -75,13 +75,14 @@ const ReviewResult = memo<ReviewResultProps>(
                 <div>
                     <span className="text-slate-600">Jawaban Benar: </span>
                     <span className="text-green-600 font-mono">
-                        {JSON.stringify(correctAnswer)}
+                        {JSON.stringify(correct_answer)}
                     </span>
                 </div>
             </div>
         )
     },
 )
+ReviewResult.displayName = "ReviewResult"
 
 type BlankChipProps = {
     value: string
@@ -120,6 +121,7 @@ const BlankChip = memo<BlankChipProps>(
         )
     },
 )
+BlankChip.displayName = "BlankChip"
 
 type OptionChipProps = {
     option: string
@@ -148,15 +150,22 @@ const OptionChip = memo<OptionChipProps>(
         )
     },
 )
+OptionChip.displayName = "OptionChip"
 
 const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
     question,
     isReviewMode = false,
     onAnswerChange,
 }) => {
-    const userSelected = question.current_answer ?? []
-    const correctAnswer = question.correctAnswer ?? []
-    const options = question.options ?? []
+    const userSelected = useMemo(
+        () => question.current_answer ?? [],
+        [question.current_answer],
+    )
+    const correct_answer = useMemo(
+        () => question.correct_answer ?? [],
+        [question.correct_answer],
+    )
+    const options = useMemo(() => question.options ?? [], [question.options])
 
     // Use object to track answers by blank index instead of array
     // This preserves blank positions when deleting an answer
@@ -390,7 +399,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
                 <div className="mt-3 space-y-2 text-sm">
                     <ReviewResult
                         selectedChips={selectedChips}
-                        correctAnswer={correctAnswer}
+                        correct_answer={correct_answer}
                         blankCount={blankCount}
                     />
                 </div>

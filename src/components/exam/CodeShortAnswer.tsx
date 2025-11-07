@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, memo } from "react"
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react"
 import { Question } from "@/types/attempt"
 import { parseQuestionContent } from "@/lib/question-parser"
 
@@ -12,10 +12,10 @@ type CodeShortAnswerProps = {
 
 const areAnswersCorrect = (
     answers: string[],
-    correctAnswer: string[],
+    correct_answer: string[],
 ): boolean => {
-    if (answers.length !== correctAnswer.length) return false
-    return answers.every((answer, idx) => answer === correctAnswer[idx])
+    if (answers.length !== correct_answer.length) return false
+    return answers.every((answer, idx) => answer === correct_answer[idx])
 }
 
 const calculateInputWidth = (value: string): number => {
@@ -28,7 +28,7 @@ type CodeInputProps = {
     value: string
     idx: number
     isReviewMode: boolean
-    correctAnswer: string[]
+    correct_answer: string[]
     allAnswers: string[]
     onChange: (value: string, idx: number) => void
     onBlur: (idx: number) => void
@@ -39,7 +39,7 @@ const CodeInput = memo<CodeInputProps>(
         value,
         idx,
         isReviewMode,
-        correctAnswer,
+        correct_answer,
         allAnswers,
         onChange,
         onBlur,
@@ -57,7 +57,7 @@ const CodeInput = memo<CodeInputProps>(
 
         const inputStyle = !isReviewMode
             ? "bg-blue-100 border-blue-300"
-            : correctAnswer[idx] === allAnswers[idx]
+            : correct_answer[idx] === allAnswers[idx]
               ? "bg-green-100 border-green-300"
               : "bg-red-100 border-red-300"
 
@@ -78,14 +78,15 @@ const CodeInput = memo<CodeInputProps>(
         )
     },
 )
+CodeInput.displayName = "CodeInput"
 
 type ReviewResultProps = {
     answers: string[]
-    correctAnswer: string[]
+    correct_answer: string[]
 }
 
-const ReviewResult = memo<ReviewResultProps>(({ answers, correctAnswer }) => {
-    const isCorrect = areAnswersCorrect(answers, correctAnswer)
+const ReviewResult = memo<ReviewResultProps>(({ answers, correct_answer }) => {
+    const isCorrect = areAnswersCorrect(answers, correct_answer)
 
     if (isCorrect) {
         return (
@@ -109,20 +110,27 @@ const ReviewResult = memo<ReviewResultProps>(({ answers, correctAnswer }) => {
             <div>
                 <span className="text-slate-600">Jawaban Benar: </span>
                 <span className="text-green-600 font-mono">
-                    {JSON.stringify(correctAnswer)}
+                    {JSON.stringify(correct_answer)}
                 </span>
             </div>
         </div>
     )
 })
+ReviewResult.displayName = "ReviewResult"
 
 const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
     question,
     isReviewMode = false,
     onAnswerChange,
 }) => {
-    const userSelected = question.current_answer ?? []
-    const correctAnswer = question.correctAnswer ?? []
+    const userSelected = useMemo(
+        () => question.current_answer ?? [],
+        [question.current_answer],
+    )
+    const correct_answer = useMemo(
+        () => question.correct_answer ?? [],
+        [question.correct_answer],
+    )
 
     const [answers, setAnswers] = useState<string[]>(userSelected)
     const [parsed, setParsed] = useState<ReturnType<
@@ -204,7 +212,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
                                                 value={value}
                                                 idx={currentBlankIndex}
                                                 isReviewMode={isReviewMode}
-                                                correctAnswer={correctAnswer}
+                                                correct_answer={correct_answer}
                                                 allAnswers={answers}
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
@@ -222,7 +230,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
                 <div className="mt-3 space-y-2 text-sm">
                     <ReviewResult
                         answers={answers}
-                        correctAnswer={correctAnswer}
+                        correct_answer={correct_answer}
                     />
                 </div>
             )}

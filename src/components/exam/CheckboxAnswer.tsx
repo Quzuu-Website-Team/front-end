@@ -13,22 +13,6 @@ const CHAR_LABELS = Array.from({ length: 10 }, (_, i) =>
     String.fromCharCode(65 + i),
 )
 
-const parseCurrentAnswer = (
-    currentAnswer: string[] | undefined,
-    options: string[],
-): string[] => {
-    if (!currentAnswer?.length) return []
-
-    return currentAnswer
-        .map((ans) => {
-            if (ans.length === 1) return ans
-
-            const index = options.indexOf(ans)
-            return index >= 0 ? CHAR_LABELS[index] : ""
-        })
-        .filter(Boolean)
-}
-
 const getContainerClass = (
     selected: boolean,
     correct: boolean,
@@ -85,54 +69,44 @@ const CheckboxItem = memo<CheckboxItemProps>(
         </label>
     ),
 )
+CheckboxItem.displayName = "CheckboxItem"
 
 const CheckboxAnswer: React.FC<CheckboxAnswerProps> = ({
     question,
     isReviewMode = false,
     onAnswerChange,
 }) => {
-    const [localSelected, setLocalSelected] = useState<string[]>(() =>
-        parseCurrentAnswer(question.current_answer, question.options ?? []),
+    const [localSelected, setLocalSelected] = useState<string[]>(
+        question.current_answer || [],
     )
 
     const [lastQuestionId, setLastQuestionId] = useState<string>("")
 
     useEffect(() => {
         if (question.id !== lastQuestionId) {
-            setLocalSelected(
-                parseCurrentAnswer(
-                    question.current_answer,
-                    question.options ?? [],
-                ),
-            )
+            setLocalSelected(question.current_answer || [])
             setLastQuestionId(question.id)
         }
-    }, [question.id, question.current_answer, question.options, lastQuestionId])
+    }, [question.id, question.current_answer, lastQuestionId])
 
     const selectedSet = useMemo(() => new Set(localSelected), [localSelected])
 
     const correctChars = useMemo(() => {
-        if (!question.correctAnswer?.length || !question.options)
+        if (!question.correct_answer?.length || !question.options)
             return new Set<string>()
 
-        return new Set(
-            question.correctAnswer
-                .map((ans) => {
-                    if (ans.length === 1) return ans
-                    const index = question.options!.indexOf(ans)
-                    return index >= 0 ? CHAR_LABELS[index] : ""
-                })
-                .filter(Boolean),
-        )
-    }, [question.correctAnswer, question.options])
+        return new Set(question.correct_answer)
+    }, [question.correct_answer, question.options])
 
     const handleSelect = useCallback(
         (char: string) => {
             if (isReviewMode) return
 
-            const updated = selectedSet.has(char)
+            let updated = selectedSet.has(char)
                 ? localSelected.filter((c) => c !== char)
                 : [...localSelected, char]
+
+            updated = updated.sort()
 
             setLocalSelected(updated)
             onAnswerChange?.(updated)

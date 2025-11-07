@@ -1,5 +1,5 @@
 import * as React from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 
@@ -59,21 +59,23 @@ interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
 
 const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
     ({ className, href, navigable = false, onClick, ...props }, ref) => {
+        const router = useRouter()
         const isNavigable = href && navigable
 
         const handleClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
-            if (isNavigable && href) {
-                // Let Next.js Link handle the navigation
+            if (!isNavigable) {
+                onClick?.(e)
                 return
             }
-            onClick?.(e)
+
+            router.push(href)
         }
 
-        const rowContent = (
+        return (
             <tr
                 ref={ref}
                 className={cn(
-                    "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-primary-50  data-[state=selected]:text-primary data-[state=selected]:font-semibold overflow-hidden",
+                    "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-primary-50 data-[state=selected]:text-primary data-[state=selected]:font-semibold overflow-hidden",
                     (isNavigable || onClick) &&
                         "cursor-pointer hover:bg-primary-50",
                     className,
@@ -82,16 +84,6 @@ const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
                 {...props}
             />
         )
-
-        if (isNavigable && href) {
-            return (
-                <Link href={href} className="contents">
-                    {rowContent}
-                </Link>
-            )
-        }
-
-        return rowContent
     },
 )
 TableRow.displayName = "TableRow"

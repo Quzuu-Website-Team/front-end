@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, memo } from "react"
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Question } from "@/types/attempt"
@@ -9,6 +9,7 @@ type FileAnswerProps = {
     question: Question
     isReviewMode?: boolean
     onAnswerChange?: (answer: string[]) => void
+    isUploading?: boolean
 }
 
 type FileLinkProps = {
@@ -31,36 +32,43 @@ const FileLink = memo<FileLinkProps>(({ fileUrl, label }) => {
     }
     return <span className="ml-2 text-gray-500">(No file submitted)</span>
 })
+FileLink.displayName = "FileLink"
 
 const FileAnswer: React.FC<FileAnswerProps> = ({
     question,
     isReviewMode = false,
     onAnswerChange,
+    isUploading = false,
 }) => {
-    const userFileUrl = question.current_answer?.[0] ?? ""
-    const correctFileUrl = question.correctAnswer?.[0] ?? ""
+    const userFileUrl = useMemo(
+        () => question.current_answer?.[0] ?? "",
+        [question.current_answer],
+    )
+    const correctFileUrl = useMemo(
+        () => question.correct_answer?.[0] ?? "",
+        [question.correct_answer],
+    )
 
     const [fileUrl, setFileUrl] = useState<string>(userFileUrl)
 
     useEffect(() => {
         setFileUrl(userFileUrl)
-    }, [question.id])
+    }, [userFileUrl])
 
     const handleFileChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
-            if (isReviewMode) return
+            if (isReviewMode || isUploading) return
 
             const file = e.target.files?.[0]
-            if (file) {
-                const url = URL.createObjectURL(file)
-                setFileUrl(url)
-                onAnswerChange?.([url])
-            } else {
+            if (!file) {
                 setFileUrl("")
                 onAnswerChange?.([])
+                return
             }
+
+            onAnswerChange?.([file] as any)
         },
-        [isReviewMode, onAnswerChange],
+        [isReviewMode, isUploading, onAnswerChange],
     )
 
     const isCorrect = fileUrl && fileUrl === correctFileUrl
@@ -74,11 +82,15 @@ const FileAnswer: React.FC<FileAnswerProps> = ({
                         id="code-file"
                         type="file"
                         onChange={handleFileChange}
+                        disabled={isUploading}
                         className={
                             fileUrl ? "border-primary bg-primary-100" : ""
                         }
                     />
-                    {fileUrl && (
+                    {isUploading && (
+                        <p className="text-sm text-slate-500">Uploading...</p>
+                    )}
+                    {fileUrl && !isUploading && (
                         <p className="text-sm font-medium">
                             Review File Anda:
                             <FileLink fileUrl={fileUrl} label="Open file" />

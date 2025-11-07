@@ -1,9 +1,14 @@
 "use client"
 
-import React, { useEffect, useState, useMemo, useCallback } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
-import { attemptExam, submitExamAnswers } from "@/lib/api"
+import {
+    attemptExam,
+    postAnswerQuestion,
+    submitAnswerQuestion,
+    postAnswerQuestionFile,
+} from "@/lib/api"
 
 import RadioAnswer from "@/components/exam/RadioAnswer"
 import CheckboxAnswer from "@/components/exam/CheckboxAnswer"
@@ -16,11 +21,17 @@ import CodeEditorAnswer from "@/components/exam/CodeEditorAnswer"
 
 import NavQuiz from "./NavQuiz"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Attempt, Question } from "@/types/attempt"
+import { ChevronLeft, ChevronRight, Check, AlertCircle } from "lucide-react"
+import { Attempt, Question, CodeMetadata } from "@/types/attempt"
 import LoadingQuiz from "./LoadingQuiz"
 
 type UserAnswers = Record<string, string[]>
+type SavingStatus = "idle" | "saving" | "success" | "error"
+type QuestionSavingState = Record<
+    string,
+    { status: SavingStatus; timestamp: number; metadata?: CodeMetadata }
+>
+type FileUploadingState = Record<string, boolean>
 
 interface QuizState {
     attempt: Attempt | null
@@ -30,6 +41,11 @@ interface QuizState {
 }
 
 const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
+    const pathName = usePathname()
+    const basePath = useMemo(() => {
+        const segments = pathName.split("/")
+        return segments.slice(0, segments.indexOf("start") + 2).join("/")
+    }, [pathName])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [quizState, setQuizState] = useState<QuizState>({
         attempt: null,
@@ -37,6 +53,13 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
         isSubmitting: false,
         isReviewMode: false,
     })
+    const [savingStates, setSavingStates] = useState<QuestionSavingState>({})
+
+    const debounceTimersRef = useRef<Record<string, NodeJS.Timeout>>({})
+    const fileUploadTimersRef = useRef<Record<string, NodeJS.Timeout>>({})
+    const allowNavigationRef = useRef(false)
+    const [fileUploadingStates, setFileUploadingStates] =
+        useState<FileUploadingState>({})
 
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -61,6 +84,7 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
                     ...prev,
                     attempt: res,
                     userAnswers: initialized,
+                    isReviewMode: res.submitted,
                 }))
                 setIsLoading(false)
             } catch (error: any) {
@@ -77,22 +101,136 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
         fetchQuestions()
     }, [slug])
 
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (!quizState.isReviewMode && !allowNavigationRef.current) {
+                e.preventDefault()
+                e.returnValue = ""
+            }
+        }
+
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () =>
+            window.removeEventListener("beforeunload", handleBeforeUnload)
+    }, [quizState.isReviewMode])
+
     const handleUpdateAnswer = (questionId: string, answerValue: string[]) => {
-        setQuizState((prev) => ({
-            ...prev,
-            userAnswers: {
-                ...prev.userAnswers,
-                [questionId]: answerValue,
-            },
-        }))
+        const isFile =
+            answerValue[0] &&
+            typeof answerValue[0] === "object" &&
+            (answerValue[0] as any) instanceof File
+
+        if (isFile) {
+            const file = answerValue[0] as any as File
+            setFileUploadingStates((prev) => ({ ...prev, [questionId]: true }))
+
+            if (fileUploadTimersRef.current[questionId]) {
+                clearTimeout(fileUploadTimersRef.current[questionId])
+            }
+
+            fileUploadTimersRef.current[questionId] = setTimeout(async () => {
+                try {
+                    const result = await postAnswerQuestionFile(
+                        quizState.attempt!.id_attempt,
+                        questionId,
+                        file,
+                    )
+                    const url = URL.createObjectURL(file)
+                    setQuizState((prev) => ({
+                        ...prev,
+                        userAnswers: {
+                            ...prev.userAnswers,
+                            [questionId]: [url],
+                        },
+                    }))
+                    setSavingStates((prev) => ({
+                        ...prev,
+                        [questionId]: {
+                            status: "success",
+                            timestamp: Date.now(),
+                            metadata: result.meta_data,
+                        },
+                    }))
+                } catch (error) {
+                    setSavingStates((prev) => ({
+                        ...prev,
+                        [questionId]: {
+                            status: "error",
+                            timestamp: Date.now(),
+                        },
+                    }))
+                    setTimeout(() => {
+                        setSavingStates((prev) => ({
+                            ...prev,
+                            [questionId]: { status: "idle", timestamp: 0 },
+                        }))
+                    }, 3000)
+                } finally {
+                    setFileUploadingStates((prev) => ({
+                        ...prev,
+                        [questionId]: false,
+                    }))
+                }
+            }, 500)
+        } else {
+            setQuizState((prev) => ({
+                ...prev,
+                userAnswers: {
+                    ...prev.userAnswers,
+                    [questionId]: answerValue,
+                },
+            }))
+
+            setSavingStates((prev) => ({
+                ...prev,
+                [questionId]: { status: "saving", timestamp: Date.now() },
+            }))
+
+            if (debounceTimersRef.current[questionId]) {
+                clearTimeout(debounceTimersRef.current[questionId])
+            }
+
+            debounceTimersRef.current[questionId] = setTimeout(async () => {
+                try {
+                    const result = await postAnswerQuestion(
+                        quizState.attempt!.id_attempt,
+                        questionId,
+                        answerValue,
+                    )
+                    setSavingStates((prev) => ({
+                        ...prev,
+                        [questionId]: {
+                            status: "success",
+                            timestamp: Date.now(),
+                            metadata: result.meta_data,
+                        },
+                    }))
+                } catch (error) {
+                    setSavingStates((prev) => ({
+                        ...prev,
+                        [questionId]: {
+                            status: "error",
+                            timestamp: Date.now(),
+                        },
+                    }))
+
+                    setTimeout(() => {
+                        setSavingStates((prev) => ({
+                            ...prev,
+                            [questionId]: { status: "idle", timestamp: 0 },
+                        }))
+                    }, 3000)
+                }
+            }, 100)
+        }
     }
 
     const handleSubmitAnswers = useCallback(async () => {
         setQuizState((prev) => ({ ...prev, isSubmitting: true }))
 
         try {
-            // Simulate delay for better UX
-            await new Promise((r) => setTimeout(r, 1000))
+            await submitAnswerQuestion(quizState.attempt!.id_attempt)
+            allowNavigationRef.current = true
             setQuizState((prev) => ({
                 ...prev,
                 isSubmitting: false,
@@ -113,13 +251,12 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
                     "Failed to submit answers. Please try again.",
             })
         }
-    }, [])
+    }, [quizState.attempt])
 
     const currentQuestion = useMemo(() => {
         const question = quizState.attempt?.questions[currentNumber - 1]
         if (!question) return null
 
-        // Create a new question object with updated current_answer from userAnswers
         return {
             ...question,
             current_answer:
@@ -129,23 +266,25 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
         }
     }, [quizState.attempt?.questions, currentNumber, quizState.userAnswers])
 
+    const currentSavingStatus = currentQuestion
+        ? savingStates[currentQuestion.id]?.status || "idle"
+        : "idle"
+
     const handleNavigate = useCallback(
         (direction: "prev" | "next") => {
             if (direction === "prev" && currentNumber > 1) {
-                router.push(
-                    `/event-details/1/start/${slug}?num=${currentNumber - 1}`,
-                )
+                allowNavigationRef.current = true
+                router.push(`?num=${currentNumber - 1}`)
             }
             if (
                 direction === "next" &&
                 currentNumber < (quizState.attempt?.questions?.length || 0)
             ) {
-                router.push(
-                    `/event-details/1/start/${slug}?num=${currentNumber + 1}`,
-                )
+                allowNavigationRef.current = true
+                router.push(`?num=${currentNumber + 1}`)
             }
         },
-        [currentNumber, slug, quizState.attempt?.questions?.length, router],
+        [currentNumber, quizState.attempt?.questions],
     )
 
     const renderQuestionByType = useCallback(
@@ -154,6 +293,8 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
                 handleUpdateAnswer(question.id, answer)
             }
 
+            const metadata = savingStates[question.id]?.metadata
+            const isFileUploading = fileUploadingStates[question.id] || false
             const commonProps = {
                 question,
                 isReviewMode: quizState.isReviewMode,
@@ -173,11 +314,21 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
                     }
                     return <CodeShortAnswer {...commonProps} />
                 case "upload_file":
-                    return <FileAnswer {...commonProps} />
+                    return (
+                        <FileAnswer
+                            {...commonProps}
+                            isUploading={isFileUploading}
+                        />
+                    )
                 case "true_false_choice":
                     return <TrueFalseAnswer {...commonProps} />
                 case "competitive_programming":
-                    return <CodeEditorAnswer {...commonProps} />
+                    return (
+                        <CodeEditorAnswer
+                            {...commonProps}
+                            metadata={metadata}
+                        />
+                    )
                 default:
                     return (
                         <div>
@@ -186,7 +337,12 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
                     )
             }
         },
-        [quizState.isReviewMode, handleUpdateAnswer],
+        [
+            quizState.isReviewMode,
+            handleUpdateAnswer,
+            savingStates,
+            fileUploadingStates,
+        ],
     )
 
     const MemoizedQuestionComponent = useMemo(() => {
@@ -204,18 +360,38 @@ const QuizContainer: React.FC<{ slug: string }> = ({ slug = "" }) => {
         <div className="pb-10 grid grid-cols-1 lg:grid-cols-3 gap-y-8 lg:gap-x-8">
             <NavQuiz
                 totalQuestions={quizState.attempt?.questions?.length || 0}
-                basePath={`/event-details/1/start/${slug}`}
+                basePath={basePath}
                 isReviewMode={quizState.isReviewMode}
                 onSubmitAnswers={handleSubmitAnswers}
                 userAnswers={quizState.userAnswers}
                 questions={quizState.attempt?.questions || []}
+                remainingTime={quizState.attempt?.remaining_time}
             />
 
             <div className="display-quiz col-span-2 bg-white p-9 rounded-3xl text-slate-800 shadow flex flex-col gap-4">
-                <div>
-                    <span className="width-fit rounded-full font-bold bg-primary text-white p-2.5">
+                <div className="flex items-center justify-between">
+                    <span className="width-fit rounded-full font-bold bg-tertiary text-white py-2 px-4">
                         Question {currentNumber}
                     </span>
+
+                    {currentSavingStatus === "saving" && (
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <div className="animate-spin w-4 h-4 border-2 border-slate-300 border-t-primary rounded-full" />
+                            Menyimpan...
+                        </div>
+                    )}
+                    {currentSavingStatus === "success" && (
+                        <div className="flex items-center gap-2 text-sm text-green-600">
+                            <Check size={16} />
+                            Tersimpan
+                        </div>
+                    )}
+                    {currentSavingStatus === "error" && (
+                        <div className="flex items-center gap-2 text-sm text-red-600">
+                            <AlertCircle size={16} />
+                            Gagal menyimpan
+                        </div>
+                    )}
                 </div>
 
                 {currentQuestion.question_type !== "code_puzzle" &&

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const EventOverview = () => {
+const EventOverview = async () => {
     return (
         <Card className="text-slate-800">
             <CardHeader>

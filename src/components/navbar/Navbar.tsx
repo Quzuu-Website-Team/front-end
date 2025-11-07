@@ -30,7 +30,7 @@ const Navbar: React.FC = () => {
         <>
             <nav
                 className={cn(
-                    "navbar fixed z-[100] w-screen py-5 text-slate-900",
+                    "navbar fixed z-50 w-screen py-5 text-slate-900",
                     isScrolled &&
                         "bg-white/60 backdrop-blur-lg shadow-sm transition-all ease-out",
                 )}

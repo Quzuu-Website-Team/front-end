@@ -28,20 +28,10 @@ const parseAnswersToArray = (
 
     if (
         answer.length === optionCount &&
-        answer.every((a) => a === "0" || a === "1")
+        answer.every((a) => a == "0" || a == "1")
     ) {
         return answer.map((a) => parseInt(a))
     }
-
-    answer.forEach((item) => {
-        const [key, value] = item.split(":")
-        if (key !== undefined && value !== undefined) {
-            const index = parseInt(key.replace("statement_", ""))
-            if (!isNaN(index)) {
-                result[index] = value === "true" ? 1 : 0
-            }
-        }
-    })
 
     return result
 }
@@ -50,7 +40,7 @@ type StatementRowProps = {
     option: string
     index: number
     userAnswer: number
-    correctAnswer: number
+    correct_answer: number
     isReviewMode: boolean
     onAnswerChange: (index: number, value: number) => void
 }
@@ -60,11 +50,11 @@ const StatementRow = memo<StatementRowProps>(
         option,
         index,
         userAnswer,
-        correctAnswer,
+        correct_answer,
         isReviewMode,
         onAnswerChange,
     }) => {
-        const isCorrect = userAnswer === correctAnswer && userAnswer !== -1
+        const isCorrect = userAnswer === correct_answer && userAnswer !== -1
         const rowStyle =
             isReviewMode && isCorrect
                 ? "bg-green-50"
@@ -107,6 +97,7 @@ const StatementRow = memo<StatementRowProps>(
         )
     },
 )
+StatementRow.displayName = "StatementRow"
 
 const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
     question,
@@ -133,9 +124,9 @@ const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
     }, [question.id, question.current_answer, optionCount, lastQuestionId])
 
     // Parse correct answers to array format
-    const correctAnswers = useMemo(
-        () => parseAnswersToArray(question.correctAnswer ?? [], optionCount),
-        [question.correctAnswer, optionCount],
+    const correct_answers = useMemo(
+        () => parseAnswersToArray(question.correct_answer ?? [], optionCount),
+        [question.correct_answer, optionCount],
     )
 
     const handleAnswerChange = useCallback(
@@ -166,7 +157,7 @@ const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
                         option={option}
                         index={index}
                         userAnswer={localAnswers[index] ?? -1}
-                        correctAnswer={correctAnswers[index] ?? -1}
+                        correct_answer={correct_answers[index] ?? -1}
                         isReviewMode={isReviewMode}
                         onAnswerChange={handleAnswerChange}
                     />

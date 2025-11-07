@@ -13,19 +13,6 @@ const CHAR_LABELS = Array.from({ length: 10 }, (_, i) =>
     String.fromCharCode(65 + i),
 )
 
-const parseCurrentAnswer = (
-    currentAnswer: string[] | undefined,
-    options: string[],
-): string => {
-    if (!currentAnswer?.[0]) return ""
-
-    const answer = currentAnswer[0]
-    if (answer.length === 1) return answer
-
-    const index = options.indexOf(answer)
-    return index >= 0 ? CHAR_LABELS[index] : ""
-}
-
 const getContainerClass = (
     answered: boolean,
     correct: boolean,
@@ -83,6 +70,7 @@ const OptionItem = memo<OptionItemProps>(
         )
     },
 )
+OptionItem.displayName = "OptionItem"
 
 const RadioAnswer: React.FC<RadioAnswerProps> = ({
     question,
@@ -90,7 +78,7 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
     onAnswerChange,
 }) => {
     const [localSelected, setLocalSelected] = useState<string>(() =>
-        parseCurrentAnswer(question.current_answer, question.options ?? []),
+        question.current_answer ? question.current_answer[0] : "",
     )
 
     const [lastQuestionId, setLastQuestionId] = useState<string>("")
@@ -98,10 +86,7 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
     useEffect(() => {
         if (question.id !== lastQuestionId) {
             setLocalSelected(
-                parseCurrentAnswer(
-                    question.current_answer,
-                    question.options ?? [],
-                ),
+                question.current_answer ? question.current_answer[0] : "",
             )
             setLastQuestionId(question.id)
         }
@@ -117,16 +102,11 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
         [isReviewMode, onAnswerChange],
     )
 
-    const correctAnswerChar = (() => {
-        if (!question.correctAnswer?.[0]) return ""
+    const correct_answerChar = (() => {
+        if (!question.correct_answer?.[0]) return ""
 
-        const correctAnswer = question.correctAnswer[0]
-        if (correctAnswer.length === 1) return correctAnswer
-
-        if (question.options) {
-            const index = question.options.indexOf(correctAnswer)
-            return index >= 0 ? CHAR_LABELS[index] : ""
-        }
+        const correct_answer = question.correct_answer[0]
+        if (correct_answer.length === 1) return correct_answer
 
         return ""
     })()
@@ -139,7 +119,7 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
                     option={option}
                     index={index}
                     answered={localSelected === CHAR_LABELS[index]}
-                    correct={correctAnswerChar === CHAR_LABELS[index]}
+                    correct={correct_answerChar === CHAR_LABELS[index]}
                     isReviewMode={isReviewMode}
                     onSelect={handleSelect}
                 />
