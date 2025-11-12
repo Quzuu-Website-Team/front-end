@@ -4,6 +4,7 @@
 import React from "react"
 import { SessionProvider } from "next-auth/react"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { TanstackProvider } from "./TanstackProvider"
 
 interface ProvidersProps {
     children: React.ReactNode
@@ -11,8 +12,10 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
     return (
-        <SessionProvider>
-            <AuthProvider>{children}</AuthProvider>
-        </SessionProvider>
+        <TanstackProvider>
+            <SessionProvider>
+                <AuthProvider>{children}</AuthProvider>
+            </SessionProvider>
+        </TanstackProvider>
     )
 }

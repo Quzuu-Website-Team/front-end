@@ -2,8 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
-import { formatDateTime } from "@/lib/date-utils"
-import { getEventStatus } from "@/lib/events/event-status"
+import { formatDateTime } from "@/lib/utils/date-utils"
+import { getEventStatus } from "@/lib/utils/event-status"
 
 export type Events = {
     id_event: string

@@ -1,71 +1,114 @@
 "use client"
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useGetDetailEvent } from "@/lib/queries/events"
 import { cn } from "@/lib/utils"
+import { LockIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+
+const fallbackImage = "/assets/img/event-placeholder.svg"
 
 const NavEvent = ({ slug }: { slug: string }) => {
     const pathname = usePathname()
 
-    const menuItems = [
-        {
-            href: `/event-details/${slug}`,
-            label: "Overview",
-            exact: true,
-        },
-        {
-            href: `/event-details/${slug}/start`,
-            label: "Start The Quiz",
-            highlight: true,
-        },
-        {
-            href: `/event-details/${slug}/announcement`,
-            label: "Announcement",
-        },
-        {
-            href: `/event-details/${slug}/scoreboard`,
-            label: "Scoreboard",
-        },
-    ]
+    const { data: eventDetail, isLoading: loadingDetailEvent } =
+        useGetDetailEvent(slug)
 
-    const isActive = (href: string, exact?: boolean) => {
-        if (exact) {
-            return pathname === href
-        }
-        return pathname.startsWith(href)
+    const [imageSrc, setImageSrc] = useState(
+        eventDetail?.image_url || fallbackImage,
+    )
+
+    const menuItems = useMemo(
+        () => [
+            {
+                href: `/event-details/${slug}`,
+                label: "Overview",
+                exact: true,
+            },
+            {
+                href: `/event-details/${slug}/start`,
+                label: "Start The Quiz",
+                highlight: true,
+            },
+            {
+                href: `/event-details/${slug}/announcement`,
+                label: "Announcement",
+            },
+            {
+                href: `/event-details/${slug}/scoreboard`,
+                label: "Scoreboard",
+            },
+        ],
+        [slug],
+    )
+
+    const isActive = useCallback(
+        (href: string, exact?: boolean) => {
+            if (exact) {
+                return pathname === href
+            }
+            return pathname.startsWith(href)
+        },
+        [pathname],
+    )
+
+    if (loadingDetailEvent || !eventDetail) {
+        return (
+            <Card className="col-span-1 text-slate-800">
+                <CardHeader>
+                    <div className="h-40 w-full aspect-video bg-gray-200 rounded-lg animate-pulse"></div>
+                </CardHeader>
+                <CardContent className="menu-links w-full space-y-1">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                        <div
+                            key={idx}
+                            className="h-8 w-full bg-gray-200 rounded-full animate-pulse"
+                        ></div>
+                    ))}
+                </CardContent>
+            </Card>
+        )
     }
 
     return (
         <Card className="col-span-1 text-slate-800">
             <CardHeader>
                 <Image
-                    src="/assets/img/promotor-TROC.png"
-                    alt="TROC"
+                    src={imageSrc}
+                    alt={eventDetail.title}
+                    onError={() => setImageSrc(fallbackImage)}
                     layout="responsive"
-                    className="object-contain w-full h-auto rounded-lg"
-                    width={300}
-                    height={100}
+                    className="object-cover w-full aspect-video rounded-lg"
+                    width={320}
+                    height={180}
                 />
             </CardHeader>
             <CardContent className="menu-links w-full space-y-1">
-                {menuItems.map((item) => {
+                {menuItems.map((item, index) => {
                     const active = isActive(item.href, item.exact)
                     return (
                         <Link
-                            key={item.href}
-                            href={item.href}
+                            key={item.label}
+                            href={eventDetail.register_status ? item.href : "#"}
                             className={cn(
-                                "block w-full py-1.5 px-4 xl:px-12 rounded-full transition-colors",
+                                "flex justify-between gap-2 w-full py-1.5 px-4 xl:px-12 rounded-full transition-colors",
                                 active
-                                    ? "bg-primary text-white"
+                                    ? "bg-primary-50 text-primary border border-primary font-semibold"
                                     : item.highlight
                                       ? "text-primary font-semibold hover:bg-primary/10"
                                       : "hover:bg-primary-50 hover:text-primary",
+                                index !== 0 &&
+                                    !eventDetail.register_status &&
+                                    "pointer-events-none opacity-50",
                             )}
                         >
-                            {item.label}
+                            <span>{item.label}</span>
+                            {!eventDetail.register_status && index !== 0 && (
+                                <LockIcon className="w-4 h-4 text-gray-400" />
+                            )}
                         </Link>
                     )
                 })}

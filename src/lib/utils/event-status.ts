@@ -10,7 +10,7 @@ export const getEventStatus = (
 ): {
     status: "upcoming" | "ongoing" | "ended"
     label: string
-    variant: "tertiary" | "success" | "secondary"
+    variant: "secondary" | "tertiary" | "destructive"
 } => {
     try {
         const now = new Date()
@@ -36,7 +36,7 @@ export const getEventStatus = (
         return {
             status: "ended",
             label: "Ended",
-            variant: "success",
+            variant: "destructive",
         }
     } catch (error) {
         console.error("Error getting event status:", error)

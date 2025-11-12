@@ -1,10 +1,18 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import EventHeader from "./containers/EventHeader"
 import NavEvent from "./containers/NavEvent"
 import { cn } from "@/lib/utils"
-import { use } from "react"
+import { useGetDetailEvent } from "@/lib/queries/events"
+import {
+    Toast,
+    ToastProvider,
+    ToastTitle,
+    ToastViewport,
+} from "@/components/ui/toast"
+import { LoaderCircle } from "lucide-react"
+import { useEffect } from "react"
 
 interface EventLayoutProps {
     children: React.ReactNode
@@ -12,17 +20,24 @@ interface EventLayoutProps {
 }
 
 const EventLayout = ({ children, params }: EventLayoutProps) => {
+    const router = useRouter()
     const { slug } = params
     const pathname = usePathname()
-    const eventTitle = "Try Out OSNK Informatika 2023"
-    const eventSubtitle = "Event Details"
 
     const isInQuizSection =
         pathname.includes("/start/") && pathname.split("/start/").length > 1
 
+    const { isFetching, isError, data, isLoading } = useGetDetailEvent(slug)
+
+    useEffect(() => {
+        if ((isError || !isLoading) && !data) {
+            router.push("/event/not-found")
+        }
+    }, [isError, isLoading, data, router])
+
     return (
         <main className="event-layout container text-foreground min-h-screen">
-            <EventHeader title={eventTitle} subtitle={eventSubtitle} />
+            <EventHeader slug={slug} />
 
             <section className="pb-10 grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-x-8">
                 {!isInQuizSection && <NavEvent slug={slug} />}
@@ -34,6 +49,19 @@ const EventLayout = ({ children, params }: EventLayoutProps) => {
                     {children}
                 </div>
             </section>
+
+            <ToastProvider>
+                <Toast open={isFetching}>
+                    <ToastTitle className="flex items-center gap-2">
+                        <LoaderCircle
+                            size={20}
+                            className="inline-block animate-spin"
+                        />
+                        <span>Loading event details...</span>
+                    </ToastTitle>
+                </Toast>
+                <ToastViewport />
+            </ToastProvider>
         </main>
     )
 }

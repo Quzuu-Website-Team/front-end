@@ -16,6 +16,7 @@ export default function Home() {
 
     const fetchEvents = async () => {
         try {
+            setLoading(true)
             const eventData = await getEventList()
             console.log("eventData", eventData)
             setData(eventData)
@@ -63,7 +64,7 @@ export default function Home() {
                 />
 
                 <aside>
-                    <CardPrivateEvent />
+                    <CardPrivateEvent onEnrollSuccess={() => fetchEvents()} />
                 </aside>
             </section>
         </main>

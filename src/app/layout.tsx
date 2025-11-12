@@ -3,7 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/navbar/Navbar"
 import { Toaster } from "@/components/ui/toaster"
-import { Providers } from "@/components/Providers"
+import { Providers } from "@/providers/Providers"
 import { cn } from "@/lib/utils"
 
 const inter = Inter({

@@ -9,8 +9,6 @@ export default function NavbarMenu() {
         { title: "Home", path: "/" },
         { title: "Event", path: "/event" },
         { title: "Learn", path: "/learn" },
-        { title: "Problemset", path: "/problemset" },
-        { title: "Submission", path: "/submission" },
         { title: "Leaderboard", path: "/leaderboard" },
     ]
 
@@ -26,16 +24,18 @@ export default function NavbarMenu() {
     return (
         <ul className="max-md:w-full max-md:px-8 flex flex-col md:flex-row justify-center md:justify-end items-center gap-5 md:flex md:gap-0 md:bg-white rounded-full">
             {menus.map((item, idx) => (
-                <li
-                    key={idx}
-                    className={cn(
-                        "md:h-12 max-md:w-full flex items-center justify-center text-foreground py-2 px-4 md:px-3 lg:px-4 xl:px-6 rounded-full transition-colors cursor-pointer",
-                        isActiveMenu(item.path)
-                            ? "text-white bg-primary-500"
-                            : "hover:bg-primary-50",
-                    )}
-                >
-                    <Link href={item.path}>{item.title}</Link>
+                <li key={idx}>
+                    <Link
+                        className={cn(
+                            "md:h-12 max-md:w-full flex items-center justify-center text-foreground py-2 px-4 lg:px-6 xl:px-8 rounded-full transition-all cursor-pointer",
+                            isActiveMenu(item.path)
+                                ? "text-white bg-primary-500 font-medium"
+                                : "hover:bg-primary-50",
+                        )}
+                        href={item.path}
+                    >
+                        {item.title}
+                    </Link>
                 </li>
             ))}
         </ul>
