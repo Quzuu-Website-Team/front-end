@@ -13,7 +13,13 @@ import {
     CardTitle,
 } from "./ui/card"
 
-const CardPrivateEvent = () => {
+interface CardPrivateEventProps {
+    onEnrollSuccess: () => void
+}
+
+const CardPrivateEvent: React.FC<CardPrivateEventProps> = ({
+    onEnrollSuccess,
+}) => {
     const [eventCode, setEventCode] = useState("")
     const [loading, setLoading] = useState(false)
 
@@ -43,6 +49,7 @@ const CardPrivateEvent = () => {
                 eventCode,
             )) as EventRegistrationResponse
 
+            onEnrollSuccess()
             toast({
                 title: "Successfully enrolled!",
                 description:

@@ -1,5 +1,5 @@
 import { AnswerAttemptResponse, Attempt } from "@/types/attempt"
-import { EventData, EventListResponse } from "@/types/events"
+import { EventData } from "@/types/events"
 import axios, { AxiosError, AxiosResponse } from "axios"
 import Cookies from "js-cookie"
 

@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -41,7 +40,7 @@ const Navbar: React.FC = () => {
                             {/* <h1 className="text-4xl font-semibold">Quzuu</h1> */}
                             <Image
                                 src="/assets/img/logo-transparent.png"
-                                alt="Logo Quzzu"
+                                alt="Logo Quzuu"
                                 className="!h-14 w-fit object-contain"
                                 width={100}
                                 height={56}
@@ -64,7 +63,7 @@ const Navbar: React.FC = () => {
                                 : "max-md:-translate-y-[200%]",
                         )}
                     >
-                        <div className="flex flex-col-reverse md:flex-row justify-center md:justify-end items-center space-y-8 md:space-y-0 gap-4">
+                        <div className="flex flex-col-reverse md:flex-row justify-center md:justify-end items-center space-y-8 md:space-y-0 gap-4 md:gap-6 xl:gap-20">
                             <NavbarMenu />
                             {/* User dropdown or login/register buttons */}
                             <div>

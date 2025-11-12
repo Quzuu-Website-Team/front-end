@@ -1,27 +1,64 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
 
-const EventOverview = async () => {
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useGetDetailEvent } from "@/lib/queries/events"
+import DOMPurify from "isomorphic-dompurify"
+import Image from "next/image"
+import { useMemo } from "react"
+import RegisterEvent from "./containers/RegisterEvent"
+
+const EventOverview = ({ params }: { params: { slug: string } }) => {
+    const { data: eventDetail, isLoading: loadingDetailEvent } =
+        useGetDetailEvent(params.slug)
+
+    const cleanHtml = useMemo(() => {
+        if (!eventDetail?.overview) return ""
+        return DOMPurify.sanitize(eventDetail.overview)
+    }, [eventDetail])
+
+    if (loadingDetailEvent || !eventDetail) {
+        return (
+            <Card className="text-slate-800">
+                <CardHeader>
+                    <CardTitle>
+                        <div className="h-8 w-60 bg-gray-200 rounded-full animate-pulse"></div>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <div className="h-6 w-full bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="h-6 w-full bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="h-6 w-2/3 bg-gray-200 rounded-full animate-pulse"></div>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <Card className="text-slate-800">
             <CardHeader>
                 <CardTitle>Event Overview</CardTitle>
             </CardHeader>
             <CardContent>
-                <ol className="list-decimal ml-5 space-y-2">
-                    <li>
-                        Soal Ujian terdiri dari 2 jenis. Bagian A : Soal Pilihan
-                        Ganda dan Isian
-                    </li>
-                    <li>Dan Bagian B : Soal Membuat Program</li>
-                    <li>
-                        Lorem ipsum dolar si amet Lorem ipsum dolar si ametLorem
-                        ipsum dolar si amet
-                    </li>
-                    <li>
-                        Lorem ipsum dolar si amet Lorem ipsum dolar si ametLorem
-                        ipsum dolar si amet
-                    </li>
-                </ol>
+                {eventDetail.overview ? (
+                    <div
+                        className="prose prose-slate"
+                        dangerouslySetInnerHTML={{ __html: cleanHtml }}
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center gap-4 py-10">
+                        <Image
+                            height={200}
+                            width={200}
+                            alt="No overview"
+                            src="/assets/img/question-text.svg"
+                        />
+                        <p className="text-lg text-gray-500">
+                            No overview available for this event.
+                        </p>
+                    </div>
+                )}
+
+                <RegisterEvent slug={params.slug} />
             </CardContent>
         </Card>
     )
