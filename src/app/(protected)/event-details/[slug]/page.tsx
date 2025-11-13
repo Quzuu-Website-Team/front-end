@@ -34,7 +34,7 @@ const EventOverview = ({ params }: { params: { slug: string } }) => {
     }
 
     return (
-        <Card className="text-slate-800">
+        <Card className="text-slate-800 h-full">
             <CardHeader>
                 <CardTitle>Event Overview</CardTitle>
             </CardHeader>
