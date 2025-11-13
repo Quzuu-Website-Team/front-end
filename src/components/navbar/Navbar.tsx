@@ -41,9 +41,10 @@ const Navbar: React.FC = () => {
                             <Image
                                 src="/assets/img/logo-transparent.png"
                                 alt="Logo Quzuu"
-                                className="!h-14 w-fit object-contain"
+                                className="w-auto object-contain"
                                 width={100}
                                 height={56}
+                                priority
                             />
                         </Link>
                         <div className="md:hidden">

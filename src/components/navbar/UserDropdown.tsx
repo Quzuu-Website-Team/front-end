@@ -129,7 +129,7 @@ const UserDropdown: React.FC = () => {
                     />
                 </div>
                 <span className="text-slate-800 max-w-[100px] truncate font-medium max-md:block max-lg:hidden">
-                    {user.fullName || user.username}
+                    {user.username}
                 </span>
                 <ChevronDown
                     className={`h-4 w-4 text-slate-800 transition-transform  max-md:block max-lg:hidden ${isOpen ? "rotate-180" : ""}`}

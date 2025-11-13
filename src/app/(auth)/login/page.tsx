@@ -25,7 +25,9 @@ import Link from "next/link"
 import GoogleSignInButton from "@/components/GoogleSignInButton"
 
 const FormSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address." }),
+    email_or_username: z.string().min(3, {
+        message: "Email or Username must be at least 3 characters.",
+    }),
     password: z.string().min(7, {
         message: "Password must be at least 7 characters.",
     }),
@@ -40,7 +42,7 @@ const Login = () => {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            email: "",
+            email_or_username: "",
             password: "",
         },
     })
@@ -50,9 +52,14 @@ const Login = () => {
         setErrorMessage("")
 
         try {
-            console.log("Attempting login with:", { email: data.email })
+            console.log("Attempting login with:", {
+                email_or_username: data.email_or_username,
+            })
 
-            const response = await loginUser(data.email, data.password)
+            const response = await loginUser(
+                data.email_or_username,
+                data.password,
+            )
             console.log("Login response:", response)
 
             await refreshUserData()
@@ -67,7 +74,7 @@ const Login = () => {
                 response.account.is_email_verified === false
             ) {
                 router.push(
-                    `/verify-email?email=${encodeURIComponent(data.email)}`,
+                    `/verify-email?email=${encodeURIComponent(response.account.email)}`,
                 )
                 return
             }
@@ -116,7 +123,7 @@ const Login = () => {
                     Welcome back to Quzuu
                 </h1>
                 <p className="text-slate-500 mb-8">
-                    Enter your email and password to continue.
+                    Enter your email/username and password to continue.
                 </p>
 
                 {/* Google Sign-In Button */}
@@ -139,14 +146,14 @@ const Login = () => {
                     >
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="email_or_username"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>Email or Username</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="your-email@example.com"
-                                            type="email"
+                                            placeholder="Input your email or username"
+                                            type="text"
                                             {...field}
                                         />
                                     </FormControl>
@@ -162,7 +169,7 @@ const Login = () => {
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Password"
+                                            placeholder="Input your password"
                                             type="password"
                                             {...field}
                                         />
