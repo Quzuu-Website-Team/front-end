@@ -8,3 +8,10 @@ export interface ListData<T = unknown> {
         total_records: number
     }
 }
+
+export interface ResponseData<T = unknown, M = unknown> {
+    status: string
+    data: T
+    message: string
+    meta_data: M
+}

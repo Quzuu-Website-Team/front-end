@@ -73,7 +73,6 @@ const Navbar: React.FC = () => {
                     </div>
                 </div>
             </nav>
-            <div style={{ paddingTop: "80px" }}></div>
         </>
     )
 }
