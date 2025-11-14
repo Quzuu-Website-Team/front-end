@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useCallback, memo, useEffect } from "react"
-import { Input } from "../ui/input"
+import { Input } from "../../ui/input"
 import { Question } from "@/types/attempt"
 
 type ShortAnswerProps = {
@@ -19,6 +19,12 @@ const ShortAnswer: React.FC<ShortAnswerProps> = ({
         question.current_answer?.[0] ?? "",
     )
 
+    // Sync state when question or answer changes
+    useEffect(() => {
+        const answer = question.current_answer?.[0] ?? ""
+        setLocalInput(answer)
+    }, [question.id_question, question.current_answer])
+
     const handleInputChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
             if (isReviewMode) return
@@ -34,7 +40,7 @@ const ShortAnswer: React.FC<ShortAnswerProps> = ({
 
     const isCorrect =
         localInput.trim().toLowerCase() ===
-        (question.correct_answer?.[0] ?? "").trim().toLowerCase()
+        (question.ans_key?.[0] ?? "").trim().toLowerCase()
 
     const inputStyle = isReviewMode
         ? isCorrect
@@ -66,11 +72,11 @@ const ShortAnswer: React.FC<ShortAnswerProps> = ({
                             {localInput || "-"}
                         </span>
                     </div>
-                    {!isCorrect && question.correct_answer?.[0] && (
+                    {!isCorrect && question.ans_key?.[0] && (
                         <div className="flex items-center gap-2">
                             <span className="font-medium">Correct Answer:</span>
                             <span className="text-green-600">
-                                {question.correct_answer[0]}
+                                {question.ans_key[0]}
                             </span>
                         </div>
                     )}

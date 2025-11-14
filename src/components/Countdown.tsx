@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from "react"
 
-const Countdown = ({ initialTime = 7200 }: { initialTime?: number }) => {
+type CountdownProps = {
+    initialTime?: number // in seconds
+    onTimeout?: () => void
+}
+const Countdown = ({ initialTime = 7200, onTimeout }: CountdownProps) => {
     const [timeLeft, setTimeLeft] = useState<number>(initialTime)
 
     useEffect(() => {
-        if (timeLeft <= 0) return
+        if (timeLeft <= 0) {
+            onTimeout?.()
+            return
+        }
 
         const intervalId = setInterval(() => {
             setTimeLeft((prevTime) => Math.max(prevTime - 1, 0))
         }, 1000)
 
         return () => clearInterval(intervalId)
-    }, [timeLeft])
+    }, [timeLeft, onTimeout])
 
     const formatTime = (seconds: number) => {
         const h = Math.floor(seconds / 3600)

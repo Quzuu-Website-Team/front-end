@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from "react"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 import { Question } from "@/types/attempt"
 import { parseQuestionContent, getBlankCount } from "@/lib/question-parser"
 
@@ -162,8 +162,8 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
         [question.current_answer],
     )
     const correct_answer = useMemo(
-        () => question.correct_answer ?? [],
-        [question.correct_answer],
+        () => question.ans_key ?? [],
+        [question.ans_key],
     )
     const options = useMemo(() => question.options ?? [], [question.options])
 
@@ -180,18 +180,18 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
     )
     const [parsed, setParsed] = useState<
         ReturnType<typeof parseQuestionContent>
-    >(() => parseQuestionContent(question.content || ""))
+    >(() => parseQuestionContent(question.question || ""))
     const [lastQuestionId, setLastQuestionId] = useState<string>("")
 
     // Parse content only when question changes
     useEffect(() => {
-        const parsed = parseQuestionContent(question.content || "")
+        const parsed = parseQuestionContent(question.question || "")
         setParsed(parsed)
-    }, [question.id, question.content])
+    }, [question.id_question, question.question])
 
     // Only sync when question actually changes (new question), not on every userSelected change
     useEffect(() => {
-        if (question.id !== lastQuestionId) {
+        if (question.id_question !== lastQuestionId) {
             const updated: Record<number, string> = {}
             userSelected.forEach((chip, idx) => {
                 // Only add non-empty chips (ignore empty strings from previous conversion)
@@ -200,9 +200,9 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
                 }
             })
             setSelectedChips(updated)
-            setLastQuestionId(question.id)
+            setLastQuestionId(question.id_question)
         }
-    }, [question.id, userSelected, lastQuestionId])
+    }, [question.id_question, userSelected, lastQuestionId])
 
     const blankCount = parsed ? getBlankCount(parsed.codeBlocks) : 0
     const selectedCount = Object.keys(selectedChips).length

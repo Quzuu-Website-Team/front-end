@@ -8,7 +8,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "../ui/table"
+} from "../../ui/table"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Question } from "@/types/attempt"
 
@@ -115,19 +115,48 @@ const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
 
     // Add effect to sync when question changes
     useEffect(() => {
-        if (question.id !== lastQuestionId) {
-            setLocalAnswers(
-                parseAnswersToArray(question.current_answer ?? [], optionCount),
-            )
-            setLastQuestionId(question.id)
+        if (question.id_question !== lastQuestionId) {
+            // Convert binary format ['0','1','0','1'] to number array [0,1,0,1]
+            const answer = question.current_answer || []
+            let parsedAnswer: number[] = Array(optionCount).fill(-1)
+
+            if (
+                answer.length === optionCount &&
+                answer.every((a) => a === "0" || a === "1")
+            ) {
+                parsedAnswer = answer.map((a) => parseInt(a))
+            }
+
+            setLocalAnswers(parsedAnswer)
+            setLastQuestionId(question.id_question)
         }
-    }, [question.id, question.current_answer, optionCount, lastQuestionId])
+    }, [
+        question.id_question,
+        question.current_answer,
+        optionCount,
+        lastQuestionId,
+    ])
 
     // Parse correct answers to array format
-    const correct_answers = useMemo(
-        () => parseAnswersToArray(question.correct_answer ?? [], optionCount),
-        [question.correct_answer, optionCount],
-    )
+    const correct_answers = useMemo(() => {
+        // Use ans_key (only available during review/submitted)
+        if (!question.ans_key?.length) {
+            return Array(optionCount).fill(-1)
+        }
+
+        const ansKey = question.ans_key
+
+        // If format is binary ['0','1','0','1'], convert to numbers
+        if (
+            ansKey.length === optionCount &&
+            ansKey.every((a: string) => a === "0" || a === "1")
+        ) {
+            return ansKey.map((a: string) => parseInt(a))
+        }
+
+        // Fallback to unfilled
+        return Array(optionCount).fill(-1)
+    }, [question.ans_key, optionCount])
 
     const handleAnswerChange = useCallback(
         (index: number, value: number) => {
@@ -136,7 +165,11 @@ const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
             const updated = [...localAnswers]
             updated[index] = value
             setLocalAnswers(updated)
-            onAnswerChange?.(updated.map((a) => a.toString()))
+
+            // Convert to binary format: ['0', '1', '0', '1']
+            // where 1 = true, 0 = false, -1 stays as '0'
+            const binaryAnswer = updated.map((a) => (a === 1 ? "1" : "0"))
+            onAnswerChange?.(binaryAnswer)
         },
         [localAnswers, isReviewMode, onAnswerChange],
     )

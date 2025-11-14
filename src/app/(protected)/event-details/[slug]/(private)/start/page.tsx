@@ -5,6 +5,9 @@ import styles from "./start.module.css"
 import { usePathname } from "next/navigation"
 import SectionQuiz from "@/app/(protected)/event-details/[slug]/containers/SectionQuiz"
 import Link from "next/link"
+import { useGetListEventExam } from "@/lib/queries/events"
+import LoadingExamList from "./containers/LoadingExamList"
+import EmptyExamList from "./containers/EmptyExamList"
 
 interface SectionData {
     id: number
@@ -22,50 +25,32 @@ interface SectionData {
     duration: string | null
 }
 
-const StartQuiz = () => {
+const StartQuiz = ({ params }: { params: { slug: string } }) => {
     const pathname = usePathname()
 
-    const [sections, setSections] = useState<SectionData[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-
-    useEffect(() => {
-        const getSections = async () => {
-            try {
-                const res = await fetch("/dummySections.json")
-                const data = await res.json()
-                setSections(data)
-            } catch (error) {
-                console.error("Failed to fetch sections:", error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        getSections()
-    }, [])
+    const { isLoading, data } = useGetListEventExam(params.slug)
 
     if (isLoading) {
-        return (
-            <div className="py-8">
-                <h1 className="text-2xl font-bold mb-4">
-                    Loading section quiz...
-                </h1>
-            </div>
-        )
+        return <LoadingExamList />
     }
 
     return (
         <div
-            className={`${styles["card-section-quiz"]} max-h-screen overflow-y-auto`}
+            className={`${styles["card-section-quiz"]} max-h-screen overflow-y-auto h-full`}
         >
-            {sections.map((section) => (
-                <Link
-                    key={section.id}
-                    href={`${pathname}/${section.slug}`}
-                    className="block"
-                >
-                    <SectionQuiz section={section} />
-                </Link>
-            ))}
+            {data?.length ? (
+                data.map((exam) => (
+                    <Link
+                        key={exam.id_exam}
+                        href={`${pathname}/${exam.slug}`}
+                        className="block"
+                    >
+                        <SectionQuiz section={exam} />
+                    </Link>
+                ))
+            ) : (
+                <EmptyExamList />
+            )}
         </div>
     )
 }

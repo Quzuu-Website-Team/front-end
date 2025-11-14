@@ -6,6 +6,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { ExamListItem } from "@/types/attempt"
 import { Award, CheckCircle2, XCircle, HelpCircle, Clock } from "lucide-react"
 
 interface SectionData {
@@ -25,29 +26,18 @@ interface SectionData {
 }
 
 type SectionQuizProps = {
-    section: SectionData
+    section: ExamListItem
 }
 
 const SectionQuiz: React.FC<SectionQuizProps> = ({ section }) => {
-    const {
-        title,
-        description,
-        isCompleted,
-        score,
-        correctCount,
-        wrongCount,
-        emptyCount,
-        reviewCount,
-        startTime,
-        endTime,
-        duration,
-    } = section
+    const { title, description, duration, is_completed } = section
 
     return (
         <Card
             className={cn(
-                "mb-3.5",
-                isCompleted && "bg-violet-100 border-l-4 border-violet-500",
+                "mb-3.5 transition-all",
+                "hover:shadow-md hover:border-primary-300 duration-200",
+                is_completed && "bg-violet-100 border-l-4 border-violet-500",
             )}
         >
             <CardHeader>
@@ -55,9 +45,12 @@ const SectionQuiz: React.FC<SectionQuizProps> = ({ section }) => {
                 <CardDescription className="text-base text-slate-600 mt-2">
                     {description}
                 </CardDescription>
+                <CardDescription className="text-base text-slate-600 mt-2">
+                    Time Limit : {duration} minutes
+                </CardDescription>
             </CardHeader>
 
-            {isCompleted && (
+            {/* {is_completed && (
                 <CardContent>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
@@ -141,7 +134,7 @@ const SectionQuiz: React.FC<SectionQuizProps> = ({ section }) => {
                         </div>
                     </div>
                 </CardContent>
-            )}
+            )} */}
         </Card>
     )
 }
