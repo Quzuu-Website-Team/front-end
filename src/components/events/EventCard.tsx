@@ -14,14 +14,14 @@ interface EventCardProps {
 const fallbackImage = "/assets/img/event-placeholder.svg"
 
 export function EventCard({ event }: EventCardProps) {
-    const { title, slug, image_url, start_event, end_event } = event
+    const { title, slug, img_banner, start_event, end_event } = event
 
     const eventStatus = getEventStatus(start_event, end_event)
 
     const formattedStartDate = formatDateTime(start_event)
     const formattedEndDate = formatDateTime(end_event)
 
-    const [imageSrc, setImageSrc] = useState(image_url || fallbackImage)
+    const [imageSrc, setImageSrc] = useState(img_banner || fallbackImage)
 
     return (
         <Link

@@ -7,7 +7,7 @@ export interface EventData {
     start_event: string
     end_event: string
     event_code?: string
-    image_url?: string
+    img_banner?: string
     is_public: boolean
     overview: string
     register_status?: boolean
