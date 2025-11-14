@@ -1,0 +1,40 @@
+{
+    "status": "success",
+    "data": {
+        "academy": {
+            "id": "acad-001",
+            "title": "Fundamental Algoritma & Struktur Data",
+            "slug": "fundamental-algoritma-struktur-data",
+            "description": "Pelajari konsep inti pemrograman, mulai dari algoritma dasar hingga implementasi struktur data penting.",
+            "progress": 33,
+            "total_materials": 3,
+            "image_url": "/images/acad_fundamental_sd.png",
+            "status": "in_progress"
+        },
+        "materials": [
+            {
+                "id": "mat-001-01",
+                "academy_id": "acad-001",
+                "title": "Pengantar Algoritma dan Kompleksitas",
+                "slug": "pengantar-algoritma-kompleksitas",
+                "description": "Memahami apa itu algoritma dan cara mengukur efisiensinya menggunakan Notasi Big O."
+            },
+            {
+                "id": "mat-001-02",
+                "academy_id": "acad-001",
+                "title": "Struktur Data Linear",
+                "slug": "struktur-data-linear",
+                "description": "Mempelajari implementasi Stack, Queue, dan Linked List."
+            },
+            {
+                "id": "mat-001-03",
+                "academy_id": "acad-001",
+                "title": "Pencarian dan Pengurutan",
+                "slug": "pencarian-pengurutan",
+                "description": "Menganalisis algoritma pencarian (Linear dan Binary) dan pengurutan (Merge, Quick)."
+            }
+        ]
+    },
+    "message": "Successfully retrieved academy details.",
+    "meta_data": {}
+}

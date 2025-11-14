@@ -6,9 +6,9 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <main>
+        <main className="min-h-screen h-full">
             <Navbar />
-            {children}
+            <div className="pt-20">{children}</div>
         </main>
     )
 }
