@@ -9,6 +9,8 @@ import type {
 import {
     AnswerAttemptPayload,
     AnswerQuestionResponse,
+    Attempt,
+    AttemptDetailResponse,
     ExamListItem,
     ExamListResponse,
     SubmitAttemptResponse,
@@ -47,8 +49,8 @@ const getListEventExam = async (slug: string): Promise<ExamListResponse> => {
 const getAttemptEventExam = async (
     eventSlug: string,
     examSlug: string,
-): Promise<ExamListResponse> => {
-    const response = await api.get<ExamListResponse>(
+): Promise<AttemptDetailResponse> => {
+    const response = await api.get<AttemptDetailResponse>(
         `/events/${eventSlug}/exam/${examSlug}/attempt`,
     )
     return response.data
@@ -62,6 +64,22 @@ const postAnswerEventExam = async (
     const response = await api.post<AnswerQuestionResponse>(
         `/events/${eventSlug}/exam/${attemptId}/answer_question`,
         payload,
+    )
+    return response.data
+}
+
+const postAnswerEventExamFile = async (
+    eventSlug: string,
+    attemptId: string,
+    payload: AnswerAttemptPayload,
+): Promise<AnswerQuestionResponse> => {
+    const formData = new FormData()
+    formData.append("file", payload.answer[0])
+    formData.append("question_id", payload.question_id)
+    const response = await api.post<AnswerQuestionResponse>(
+        `/events/${eventSlug}/exam/${attemptId}/answer_question`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } },
     )
     return response.data
 }
@@ -112,7 +130,7 @@ export const useGetListEventExam = (slug: string) => {
 }
 
 export const useGetAttemptEventExam = (eventSlug: string, examSlug: string) => {
-    return useQuery<ExamListResponse, Error, ExamListItem[]>({
+    return useQuery<AttemptDetailResponse, Error, Attempt>({
         queryKey: [EVENTS_QUERY_KEY, "get_attempt", eventSlug, examSlug],
         queryFn: () => getAttemptEventExam(eventSlug, examSlug),
         select: (response) => response.data,
@@ -127,6 +145,22 @@ export const usePostAnswerEventExam = (
         mutationKey: [EVENTS_QUERY_KEY, "post_answer", eventSlug, attemptId],
         mutationFn: (payload: AnswerAttemptPayload) =>
             postAnswerEventExam(eventSlug, attemptId, payload),
+    })
+}
+
+export const usePostAnswerEventExamFile = (
+    eventSlug: string,
+    attemptId: string,
+) => {
+    return useMutation<AnswerQuestionResponse, Error, AnswerAttemptPayload>({
+        mutationKey: [
+            EVENTS_QUERY_KEY,
+            "post_answer_file",
+            eventSlug,
+            attemptId,
+        ],
+        mutationFn: (payload: AnswerAttemptPayload) =>
+            postAnswerEventExamFile(eventSlug, attemptId, payload),
     })
 }
 

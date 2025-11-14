@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { Button } from "../ui/button"
+import { Button } from "../../ui/button"
 import React, { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { Question, CodeMetadata } from "@/types/attempt"
 import { CheckCircle, XCircle, Clock, HardDrive } from "lucide-react"
@@ -61,17 +61,18 @@ const CodeEditorAnswer: React.FC<CodeEditorAnswerProps> = ({
 
     const [code, setCode] = useState<string>(() => userCode)
 
+    // Sync state when question or answer changes
     useEffect(() => {
         setCode(userCode)
-    }, [userCode])
+    }, [userCode, question.id_question, question.current_answer])
 
     const { language, instruction } = useMemo(() => {
-        const contentParts = question.content.split(";")
+        const contentParts = question.question.split(";")
         const languagePart = contentParts[0] || ""
         const language = languagePart.replace(/^language:\s*/i, "").trim()
         const instruction = contentParts.slice(1).join(";").trim()
         return { language, instruction }
-    }, [question.content])
+    }, [question.question])
 
     const editorOptions = useMemo(
         () => ({

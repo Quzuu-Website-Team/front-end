@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useEffect, useCallback, memo, useMemo } from "react"
-import { Label } from "../ui/label"
-import { Input } from "../ui/input"
+import { Label } from "../../ui/label"
+import { Input } from "../../ui/input"
 import { Question } from "@/types/attempt"
 
 type FileAnswerProps = {

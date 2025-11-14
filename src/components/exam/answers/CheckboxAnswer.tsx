@@ -76,27 +76,46 @@ const CheckboxAnswer: React.FC<CheckboxAnswerProps> = ({
     isReviewMode = false,
     onAnswerChange,
 }) => {
-    const [localSelected, setLocalSelected] = useState<string[]>(
-        question.current_answer || [],
-    )
+    const [localSelected, setLocalSelected] = useState<string[]>([])
 
-    const [lastQuestionId, setLastQuestionId] = useState<string>("")
-
+    // Sync state when question or answer changes
     useEffect(() => {
-        if (question.id !== lastQuestionId) {
-            setLocalSelected(question.current_answer || [])
-            setLastQuestionId(question.id)
-        }
-    }, [question.id, question.current_answer, lastQuestionId])
+        const answer = question.current_answer || []
+
+        // Convert binary format ['0','1','0','1'] to char labels ['B','D']
+        const convertedAnswer = answer
+            .map((val, idx) => (val === "1" ? CHAR_LABELS[idx] : null))
+            .filter((char): char is string => char !== null)
+
+        setLocalSelected(convertedAnswer)
+    }, [question.id_question, question.current_answer])
 
     const selectedSet = useMemo(() => new Set(localSelected), [localSelected])
 
     const correctChars = useMemo(() => {
-        if (!question.correct_answer?.length || !question.options)
+        // Use ans_key (only available during review/submitted)
+        if (!question.ans_key?.length || !question.options)
             return new Set<string>()
 
-        return new Set(question.correct_answer)
-    }, [question.correct_answer, question.options])
+        const ansKey = question.ans_key
+
+        // If format is binary ['0','1','0','1'], convert to char labels
+        if (
+            ansKey.length > 1 &&
+            ansKey.every((a: string) => a === "0" || a === "1")
+        ) {
+            return new Set(
+                ansKey
+                    .map((val: string, idx: number) =>
+                        val === "1" ? CHAR_LABELS[idx] : null,
+                    )
+                    .filter((char): char is string => char !== null),
+            )
+        }
+
+        // Otherwise treat as char labels directly (fallback)
+        return new Set(ansKey)
+    }, [question.ans_key, question.options])
 
     const handleSelect = useCallback(
         (char: string) => {
@@ -109,9 +128,21 @@ const CheckboxAnswer: React.FC<CheckboxAnswerProps> = ({
             updated = updated.sort()
 
             setLocalSelected(updated)
-            onAnswerChange?.(updated)
+
+            // Convert to binary format: ['0', '1', '0', '1']
+            const binaryAnswer =
+                question.options?.map((_, idx) =>
+                    updated.includes(CHAR_LABELS[idx]) ? "1" : "0",
+                ) ?? []
+            onAnswerChange?.(binaryAnswer)
         },
-        [isReviewMode, localSelected, selectedSet, onAnswerChange],
+        [
+            isReviewMode,
+            localSelected,
+            selectedSet,
+            onAnswerChange,
+            question.options,
+        ],
     )
 
     return (

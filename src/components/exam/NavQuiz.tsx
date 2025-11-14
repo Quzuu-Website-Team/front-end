@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, memo, useState, useCallback } from "react"
+import React, { useMemo, memo, useState, useCallback, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,8 @@ type NavQuizProps = {
     userAnswers?: UserAnswers
     questions?: Question[]
     remainingTime?: number
+    showRemainingTime?: boolean
+    isSubmitting?: boolean
 }
 
 type QuestionButtonProps = {
@@ -58,10 +60,11 @@ const NavQuiz: React.FC<NavQuizProps> = ({
     userAnswers = {},
     questions = [],
     remainingTime,
+    showRemainingTime = true,
+    isSubmitting = false,
 }) => {
     const [isDialogSubmitOpen, setDialogSubmit] = useState(false)
     const [isDialogClarificationOpen, setDialogClarification] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const searchParams = useSearchParams()
     const pageNumber = searchParams.get("num")
@@ -75,11 +78,8 @@ const NavQuiz: React.FC<NavQuizProps> = ({
         setDialogClarification(true)
     }, [])
 
-    const handleConfirmSubmit = useCallback(async () => {
-        setIsSubmitting(true)
-        await onSubmitAnswers()
-        setIsSubmitting(false)
-        setDialogSubmit(false)
+    const handleConfirmSubmit = useCallback(() => {
+        onSubmitAnswers()
     }, [onSubmitAnswers])
 
     const handleConfirmClarification = useCallback(async () => {
@@ -99,25 +99,57 @@ const NavQuiz: React.FC<NavQuizProps> = ({
 
         questions.forEach((question, index) => {
             const questionNumber = index + 1
-            const answer = userAnswers[question.id]
+            const answer = userAnswers[question.id_question]
             status[questionNumber] = Array.isArray(answer) && answer.length > 0
         })
 
         return status
     }, [userAnswers, questions])
 
-    return (
-        <div className="bg-white pt-4 pb-6 px-6 rounded-3xl text-slate-800 shadow">
-            <div className="timer px-6">
-                <h3 className="text-xl font-semibold text-foreground/80 mb-1">
-                    Time Left
-                </h3>
-                <div className="run-timer py-3 px-5 rounded-2xl border border-secondary">
-                    <Countdown initialTime={remainingTime} />
-                </div>
-            </div>
+    // Convert remaining time from minutes to seconds
+    const remainingTimeInSeconds = useMemo(() => {
+        if (!showRemainingTime) return undefined
+        return remainingTime ? remainingTime * 60 : undefined
+    }, [remainingTime, showRemainingTime])
 
-            <div className="questions-number mt-5 flex flex-wrap justify-center">
+    useEffect(() => {
+        if (isDialogSubmitOpen && !isSubmitting) {
+            setDialogSubmit(false)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSubmitting])
+
+    const [isTimeout, setIsTimeout] = useState(false)
+
+    const handleTimeout = useCallback(() => {
+        setIsTimeout(true)
+        if (!isReviewMode) {
+            onSubmitAnswers()
+            setDialogSubmit(true)
+        }
+    }, [isReviewMode, onSubmitAnswers])
+
+    return (
+        <div className="bg-white pt-4 pb-6 px-6 rounded-3xl text-slate-800 shadow flex flex-col gap-6">
+            {showRemainingTime && remainingTimeInSeconds !== undefined ? (
+                <div className="timer px-6">
+                    <h3 className="text-xl font-semibold text-foreground/80 mb-1">
+                        Time Left
+                    </h3>
+                    <div className="run-timer py-3 px-5 rounded-2xl border border-secondary">
+                        <Countdown
+                            initialTime={remainingTimeInSeconds}
+                            onTimeout={handleTimeout}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <h3 className="text-xl font-semibold text-foreground/80 mb-1 px-6 inline-block">
+                    Questions
+                </h3>
+            )}
+
+            <div className="questions-number flex flex-wrap justify-center">
                 {Array.from({ length: totalQuestions }, (_, i) => i + 1).map(
                     (num) => {
                         const isActive = activePage === num
@@ -136,7 +168,7 @@ const NavQuiz: React.FC<NavQuizProps> = ({
                 )}
             </div>
 
-            <div className="buttons mt-4 flex flex-col gap-4">
+            <div className="buttons flex flex-col gap-4 mt-auto">
                 <Button
                     variant="outline"
                     onClick={handleOpenClarificationDialog}
@@ -164,6 +196,7 @@ const NavQuiz: React.FC<NavQuizProps> = ({
             </div>
 
             <SubmitConfirmDialog
+                isTimeout={isTimeout}
                 isOpen={isDialogSubmitOpen}
                 onConfirm={handleConfirmSubmit}
                 onCancel={handleCancelSubmit}

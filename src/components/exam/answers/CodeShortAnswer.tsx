@@ -128,8 +128,8 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
         [question.current_answer],
     )
     const correct_answer = useMemo(
-        () => question.correct_answer ?? [],
-        [question.correct_answer],
+        () => question.ans_key ?? [],
+        [question.ans_key],
     )
 
     const [answers, setAnswers] = useState<string[]>(userSelected)
@@ -140,17 +140,22 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
 
     // Parse content only when question changes
     useEffect(() => {
-        const parsed = parseQuestionContent(question.content || "")
+        const parsed = parseQuestionContent(question.question || "")
         setParsed(parsed)
-    }, [question.id, question.content])
+    }, [question.id_question, question.question])
 
     // Only sync when question actually changes (new question), not on every userSelected change
     useEffect(() => {
-        if (question.id !== lastQuestionId) {
+        if (question.id_question !== lastQuestionId) {
             setAnswers(userSelected)
-            setLastQuestionId(question.id)
+            setLastQuestionId(question.id_question)
         }
-    }, [question.id, userSelected, lastQuestionId])
+    }, [
+        question.id_question,
+        userSelected,
+        question.current_answer,
+        lastQuestionId,
+    ])
 
     const handleChange = useCallback(
         (value: string, idx: number) => {
