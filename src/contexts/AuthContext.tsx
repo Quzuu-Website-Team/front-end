@@ -8,7 +8,7 @@ import React, {
     ReactNode,
 } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { getAuthToken, removeAuthToken, syncNextAuthSession } from "@/lib/api"
 import { toast } from "@/hooks/use-toast"
 import Cookies from "js-cookie"
@@ -204,6 +204,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     },
                 )
 
+                setIsAuthenticated(true)
+
                 setUser({
                     id: accountData.id,
                     username:
@@ -215,7 +217,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     isProfileComplete: finalProfileComplete,
                 })
 
-                setIsAuthenticated(true)
                 return true
             }
         } catch (error) {
@@ -484,7 +485,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             console.log("🚪 Logging out...")
 
+            if (session) {
+                console.log("🔓 Signing out from NextAuth...")
+                await signOut({ redirect: false })
+            }
+
             // Clear all auth data
+            removeAuthToken()
             Cookies.remove("quzuu_auth_token", { path: "/" })
             Cookies.remove("quzuu_email_verified", { path: "/" })
             Cookies.remove("quzuu_profile_complete", { path: "/" })

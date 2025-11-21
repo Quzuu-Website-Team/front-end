@@ -61,46 +61,12 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
         try {
             console.log("🔄 Starting Google OAuth...")
 
-            const result = await signIn("google", {
-                redirect: false, // Handle redirect manually for better control
-                callbackUrl: redirectTo,
+            await signIn("google", {
+                callbackUrl: "/",
+                redirect: true,
             })
 
-            console.log("NextAuth signIn result:", result)
-
-            if (result?.error) {
-                console.error("❌ Google sign-in error:", result.error)
-
-                toast({
-                    variant: "destructive",
-                    title: "Sign-in Failed",
-                    description:
-                        result.error === "OAuthCallback"
-                            ? "OAuth authentication failed. Please try again."
-                            : "Failed to sign in with Google. Please try again.",
-                })
-
-                setIsLoading(false)
-            } else if (result?.ok) {
-                console.log("✅ Google sign-in initiated successfully")
-                // Keep loading state - will be cleared by useEffect when session is ready
-
-                // Set a timeout to prevent infinite loading
-                setTimeout(() => {
-                    if (isLoading) {
-                        console.log(
-                            "⏰ Sign-in timeout, stopping loading state",
-                        )
-                        setIsLoading(false)
-                        toast({
-                            variant: "destructive",
-                            title: "Sign-in Timeout",
-                            description:
-                                "Sign-in is taking longer than expected. Please try again.",
-                        })
-                    }
-                }, 30000) // 30 second timeout
-            }
+            setIsLoading(false)
         } catch (error: any) {
             console.error("❌ Google sign-in error:", error)
 

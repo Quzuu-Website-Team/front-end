@@ -2,6 +2,7 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { externalLogin } from "@/lib/api"
+import { cookies } from "next/headers"
 
 // Check required environment variables
 if (!process.env.GOOGLE_CLIENT_ID) {
@@ -66,10 +67,45 @@ const handler = NextAuth({
 
                     console.log("✅ Backend OAuth response:", response)
 
-                    // REMOVE setAuthToken from here - it won't work on server-side
-                    // Instead, store the token data in the user object for JWT callback
+                    // Store for JWT callback
                     user.backendToken = response.token
                     user.accountData = response.account
+
+                    const cookieStore = cookies()
+                    // Auth token
+                    cookieStore.set("quzuu_auth_token", response.token, {
+                        httpOnly: false,
+                        secure: process.env.NODE_ENV === "production",
+                        sameSite: "lax",
+                        path: "/",
+                        maxAge: 60 * 60 * 24 * 7, // 7 days
+                    })
+
+                    // Email verification status
+                    cookieStore.set(
+                        "quzuu_email_verified",
+                        response.account.is_email_verified ? "true" : "false",
+                        {
+                            httpOnly: false,
+                            secure: process.env.NODE_ENV === "production",
+                            sameSite: "lax",
+                            path: "/",
+                            maxAge: 60 * 60 * 24 * 7,
+                        },
+                    )
+
+                    // Profile completion status
+                    cookieStore.set(
+                        "quzuu_profile_complete",
+                        response.account.is_detail_completed ? "true" : "false",
+                        {
+                            httpOnly: false,
+                            secure: process.env.NODE_ENV === "production",
+                            sameSite: "lax",
+                            path: "/",
+                            maxAge: 60 * 60 * 24 * 7,
+                        },
+                    )
 
                     console.log("✅ User authentication data:", {
                         id: response.account.id,
