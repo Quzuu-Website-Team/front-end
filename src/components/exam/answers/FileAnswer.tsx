@@ -45,8 +45,8 @@ const FileAnswer: React.FC<FileAnswerProps> = ({
         [question.current_answer],
     )
     const correctFileUrl = useMemo(
-        () => question.correct_answer?.[0] ?? "",
-        [question.correct_answer],
+        () => question.ans_key?.[0] ?? "",
+        [question.ans_key],
     )
 
     const [fileUrl, setFileUrl] = useState<string>(userFileUrl)

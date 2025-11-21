@@ -18,7 +18,7 @@ const NavEvent = ({ slug }: { slug: string }) => {
         useGetDetailEvent(slug)
 
     const [imageSrc, setImageSrc] = useState(
-        eventDetail?.image_url || fallbackImage,
+        eventDetail?.img_banner || fallbackImage,
     )
 
     const menuItems = useMemo(
