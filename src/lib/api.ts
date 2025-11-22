@@ -129,12 +129,14 @@ export const removeAuthToken = (): void => {
 // AUTHENTICATION FUNCTIONS
 
 export const registerUser = async (
+    name: string,
     email: string,
     username: string,
     password: string,
 ) => {
     try {
         const response = await api.post("/authentication/register", {
+            name,
             email,
             username,
             password,

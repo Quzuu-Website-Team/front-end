@@ -49,7 +49,7 @@ export default function Home() {
                     <h1 className="text-2xl font-normal">
                         👋 Welcome Back{" "}
                         <span className="font-bold">
-                            {user?.username || user?.email || "Guest"}
+                            {user?.fullName || user?.username || "Guest"}
                         </span>
                     </h1>
                 )}
