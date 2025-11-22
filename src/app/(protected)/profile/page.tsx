@@ -1,23 +1,16 @@
 "use client"
 
 import React, { useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
-import {
-    getAuthToken,
-    removeAuthToken,
-    updateUserProfile,
-    UserProfileUpdateData,
-} from "@/lib/api"
+import { updateUserProfile, UserProfileUpdateData } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import ProfileForm, {
     ProfileFormValues,
 } from "@/components/profile-form/ProfileForm"
 
 export default function CompleteProfile() {
-    const router = useRouter()
     const [loading, setLoading] = useState(false)
-    const { user, setProfileComplete, isLoading: loadingUser } = useAuth()
+    const { user, isLoading, refreshUserData } = useAuth() // 🆕 Add isLoading from context
 
     // Format user data for form
     const defaultValues: Partial<ProfileFormValues> = useMemo(
@@ -55,56 +48,25 @@ export default function CompleteProfile() {
                 avatar: data.avatar || "avatar.png",
             }
 
-            const token = getAuthToken()
-            if (!token) {
-                throw new Error(
-                    "Authentication token not found. Please login again.",
-                )
-            }
-
             console.log("📡 Calling API...")
             await updateUserProfile(profileData)
             console.log("✅ API call successful")
-
-            // Set profile as complete
-            localStorage.setItem("profile_completed", "true")
-            setProfileComplete(true)
 
             toast({
                 title: "Profile Updated",
                 description:
                     "Your profile details have been saved successfully.",
             })
-
-            // Wait and redirect
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            window.location.href = "/"
+            await refreshUserData()
         } catch (error: any) {
             console.error("❌ Error updating profile:", error)
-            localStorage.removeItem("profile_completed")
-
-            if (
-                error.message?.includes("login") ||
-                error.message?.includes("auth") ||
-                error.message?.includes("token")
-            ) {
-                toast({
-                    variant: "destructive",
-                    title: "Authentication Error",
-                    description:
-                        "Your session has expired. Please login again.",
-                })
-                removeAuthToken()
-                router.push("/login")
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Failed to Update Profile",
-                    description:
-                        error.message ||
-                        "An error occurred while updating your profile.",
-                })
-            }
+            toast({
+                variant: "destructive",
+                title: "Failed to Update Profile",
+                description:
+                    error.message ||
+                    "An error occurred while updating your profile.",
+            })
         } finally {
             setLoading(false)
         }
@@ -126,7 +88,7 @@ export default function CompleteProfile() {
                     onSubmit={handleSubmit}
                     loading={loading}
                     submitButtonText="Save Profile"
-                    isInitialLoading={loadingUser}
+                    isInitialLoading={isLoading} // 🆕 Pass loading state
                 />
             </div>
         </main>

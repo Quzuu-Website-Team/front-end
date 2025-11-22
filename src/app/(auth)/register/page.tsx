@@ -27,6 +27,9 @@ const FormSchema = z
         email: z
             .string()
             .email({ message: "Please enter a valid email address." }),
+        name: z
+            .string()
+            .min(3, { message: "Name must be at least 3 characters." }),
         username: z
             .string()
             .min(3, { message: "Username must be at least 3 characters." })
@@ -59,6 +62,7 @@ export default function Register() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
+            name: "",
             email: "",
             username: "",
             password: "",
@@ -76,8 +80,12 @@ export default function Register() {
                 username: data.username,
             })
 
-            // Call registerUser with email, username, and password
-            await registerUser(data.email, data.username, data.password)
+            await registerUser(
+                data.name,
+                data.email,
+                data.username,
+                data.password,
+            )
 
             toast({
                 title: "Registration Successful",
@@ -105,7 +113,7 @@ export default function Register() {
     }
 
     return (
-        <div className="register-page w-screen min-h-screen bg-white grid grid-cols-1 md:grid-cols-2 gap-x-6">
+        <div className="register-page w-full min-h-screen overflow-auto bg-white grid grid-cols-1 md:grid-cols-2 gap-x-6">
             <section className="input-register p-4 flex flex-col items-center justify-center">
                 <div className="logo-wrapper w-36 mb-6">
                     <Image
@@ -146,6 +154,26 @@ export default function Register() {
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="w-2/3 space-y-6"
                     >
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Your full name"
+                                            type="text"
+                                            autoComplete="name"
+                                            disabled={loading}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
                         <FormField
                             control={form.control}
                             name="email"

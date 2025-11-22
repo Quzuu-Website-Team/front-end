@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { Suspense } from "react"
 function VerifyEmailContent() {
     const params = useSearchParams()
     const router = useRouter()
-    const { setEmailVerified } = useAuth()
+    const { setEmailVerified, user } = useAuth()
 
     const [email, setEmail] = useState("")
     const [otp, setOtp] = useState("")
@@ -30,25 +30,25 @@ function VerifyEmailContent() {
         if (!isClient) return
 
         try {
-            const emailParam = params?.get("email") || ""
-            setEmail(emailParam)
+            // Try URL param first
+            const emailParam = params?.get("email")
+
+            if (emailParam) {
+                console.log("📧 Email from URL:", emailParam)
+                setEmail(emailParam)
+            } else if (user?.email) {
+                // Fallback to AuthContext
+                console.log("📧 Email from AuthContext:", user.email)
+                setEmail(user.email)
+            } else {
+                console.warn("⚠️ No email found in URL or AuthContext")
+            }
         } catch (error) {
-            console.error("Error getting email param:", error)
+            console.error("Error getting email:", error)
         }
-    }, [isClient, params])
+    }, [isClient, params, user])
 
-    // Fetch OTP only when we have email and are on client
-    useEffect(() => {
-        if (!isClient || !email) return
-
-        const timer = setTimeout(() => {
-            fetchOTP()
-        }, 100) // Small delay to ensure everything is ready
-
-        return () => clearTimeout(timer)
-    }, [isClient, email])
-
-    const fetchOTP = async () => {
+    const fetchOTP = useCallback(async () => {
         if (!email) return
 
         try {
@@ -72,7 +72,18 @@ function VerifyEmailContent() {
                 })
             }
         }
-    }
+    }, [email])
+
+    // Fetch OTP only when we have email and are on client
+    useEffect(() => {
+        if (!isClient || !email) return
+
+        const timer = setTimeout(() => {
+            fetchOTP()
+        }, 100) // Small delay to ensure everything is ready
+
+        return () => clearTimeout(timer)
+    }, [isClient, email, fetchOTP])
 
     const handleVerify = async () => {
         if (!email || otp.length !== 6) {

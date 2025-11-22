@@ -34,6 +34,13 @@ export function middleware(request: NextRequest) {
     console.log("🍪 Token:", token ? "EXISTS" : "NOT FOUND")
     console.log("✅ Authenticated:", isAuthenticated)
 
+    // Allow access to verify-email page
+    if (path.startsWith("/verify-email")) {
+        console.log("✅ ALLOWED: Email verification page")
+        console.log("=".repeat(50))
+        return NextResponse.next()
+    }
+
     // STEP 1: Check authentication for protected routes
     const isProtectedRoute =
         protectedRoutes.some((route) => path.startsWith(route)) || path === "/"
@@ -55,13 +62,6 @@ export function middleware(request: NextRequest) {
 
     // STEP 3: Email verification check for authenticated users
     if (isAuthenticated) {
-        // Allow access to verify-email page itself
-        if (path.startsWith("/verify-email")) {
-            console.log("✅ ALLOWED: Email verification page")
-            console.log("=".repeat(50))
-            return NextResponse.next()
-        }
-
         const isEmailVerified =
             request.cookies.get("quzuu_email_verified")?.value === "true"
         console.log("📧 Email verified:", isEmailVerified)
