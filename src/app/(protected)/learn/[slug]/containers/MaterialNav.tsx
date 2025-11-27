@@ -87,7 +87,10 @@ export default function MaterialNav({
                                     const isActiveMaterial =
                                         activeMaterialSlug === material.slug
                                     return (
-                                        <AccordionItem value={material.slug}>
+                                        <AccordionItem
+                                            value={material.slug}
+                                            key={material.slug}
+                                        >
                                             <AccordionTrigger
                                                 className={cn(
                                                     isActiveMaterial
