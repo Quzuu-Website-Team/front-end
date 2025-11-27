@@ -1,21 +1,21 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import React from "react"
+import React, { useMemo } from "react"
 import DOMPurify from "isomorphic-dompurify"
 import MaterialContentFooter from "./MaterialContentFooter"
 import MaterialContentLoading from "./MaterialContentLoading"
-import { AcademyDetail, AcademyMaterialDetail } from "@/types/academy"
+import { Academy, AcademyMaterialContent } from "@/types/academy"
 import { BookX } from "lucide-react"
 
 export default function MaterialContent({
     academyDetail,
-    academyMaterial,
+    academyMaterialContent,
     isLoading,
     isError,
 }: {
-    academyDetail?: AcademyDetail
-    academyMaterial?: AcademyMaterialDetail
+    academyDetail?: Academy
+    academyMaterialContent?: AcademyMaterialContent
     isLoading: boolean
     isError: boolean
 }) {
@@ -24,11 +24,20 @@ export default function MaterialContent({
         return DOMPurify.sanitize(content)
     }
 
+    const academyMaterial = useMemo(
+        () =>
+            academyDetail?.data.find(
+                (material) =>
+                    material.id == academyMaterialContent?.material_id,
+            ),
+        [academyDetail, academyMaterialContent],
+    )
+
     if (isLoading) {
         return <MaterialContentLoading />
     }
 
-    if (isError || !academyMaterial) {
+    if (isError || !academyMaterialContent) {
         return (
             <Card className="col-span-2">
                 <CardHeader>
@@ -38,7 +47,7 @@ export default function MaterialContent({
                     <div className="flex flex-col items-center justify-center gap-4 py-10">
                         <BookX className="text-gray-400 w-40 h-40" />
                         <p className="text-lg text-gray-500">
-                            Error loading material content.
+                            Material content could not be found.
                         </p>
                     </div>
                 </CardContent>
@@ -49,27 +58,28 @@ export default function MaterialContent({
     return (
         <Card className="col-span-2">
             <CardHeader>
-                <CardTitle>{academyMaterial?.material.title}</CardTitle>
+                <CardTitle>{academyMaterial?.title}</CardTitle>
             </CardHeader>
             <CardContent>
-                {academyMaterial?.contents.map((content) => (
-                    <div key={content.id} className="mb-4 space-y-4">
-                        <div className="space-y-2" key={content.id}>
-                            <CardTitle className="text-xl">
-                                {content.title}
-                            </CardTitle>
-                            <div
-                                className="prose prose-slate"
-                                dangerouslySetInnerHTML={{
-                                    __html: sanitizeContent(content.contents),
-                                }}
-                            />
-                        </div>
-                        <hr />
-                    </div>
-                ))}
+                <div className="space-y-2">
+                    <CardTitle className="text-xl">
+                        {academyMaterialContent.title}
+                    </CardTitle>
+                    <div
+                        className="prose prose-slate"
+                        dangerouslySetInnerHTML={{
+                            __html: sanitizeContent(
+                                academyMaterialContent.contents,
+                            ),
+                        }}
+                    />
+                </div>
             </CardContent>
-            <MaterialContentFooter data={academyDetail} isLoading={isLoading} />
+            <MaterialContentFooter
+                academyDetail={academyDetail}
+                isLoading={isLoading}
+                contentOrder={academyMaterialContent.order}
+            />
         </Card>
     )
 }

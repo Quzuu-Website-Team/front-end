@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button"
 import { CardFooter } from "@/components/ui/card"
-import { AcademyDetail } from "@/types/academy"
+import { Academy } from "@/types/academy"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import React, { useMemo } from "react"
 
 export default function MaterialContentFooter({
-    data,
+    academyDetail,
     isLoading,
+    contentOrder,
 }: {
-    data?: AcademyDetail
+    academyDetail?: Academy
     isLoading: boolean
+    contentOrder: number
 }) {
     const queryParams = useSearchParams()
     const materialSlug = useMemo(
@@ -20,23 +22,54 @@ export default function MaterialContentFooter({
     )
 
     const currentMaterialIndex = useMemo(() => {
-        if (isLoading || !data) return -1
+        if (isLoading || !academyDetail) return -1
 
-        return data.materials.findIndex(
+        return academyDetail.data.findIndex(
             (material) => material.slug === materialSlug,
         )
-    }, [isLoading, data, materialSlug])
+    }, [isLoading, academyDetail, materialSlug])
 
-    const prevSlug = useMemo(() => {
-        if (isLoading || !data || currentMaterialIndex === -1) return null
-        return data.materials[currentMaterialIndex - 1]?.slug
-    }, [isLoading, data, currentMaterialIndex])
+    const prevUrl = useMemo(() => {
+        if (isLoading || !academyDetail || currentMaterialIndex === -1)
+            return null
 
-    const nextSlug = useMemo(() => {
-        if (isLoading || !data || currentMaterialIndex === -1) return null
+        const currentMaterial = academyDetail.data[currentMaterialIndex]
 
-        return data.materials[currentMaterialIndex + 1]?.slug
-    }, [isLoading, data, currentMaterialIndex])
+        // If not at first content of current material, go to previous content
+        if (contentOrder > 1) {
+            return `/learn/${academyDetail.slug}?material=${currentMaterial.slug}&content=${contentOrder - 1}`
+        }
+
+        // If at first content but not at first material, go to last content of previous material
+        if (currentMaterialIndex > 0) {
+            const prevMaterial = academyDetail.data[currentMaterialIndex - 1]
+            return `/learn/${academyDetail.slug}?material=${prevMaterial.slug}&content=${prevMaterial.contents_count}`
+        }
+
+        // At first content of first material - no previous
+        return null
+    }, [isLoading, academyDetail, currentMaterialIndex, contentOrder])
+
+    const nextUrl = useMemo(() => {
+        if (isLoading || !academyDetail || currentMaterialIndex === -1)
+            return null
+
+        const currentMaterial = academyDetail.data[currentMaterialIndex]
+
+        // If not at last content of current material, go to next content
+        if (contentOrder < currentMaterial.contents_count) {
+            return `/learn/${academyDetail.slug}?material=${currentMaterial.slug}&content=${contentOrder + 1}`
+        }
+
+        // If at last content but not at last material, go to first content of next material
+        if (currentMaterialIndex < academyDetail.data.length - 1) {
+            const nextMaterial = academyDetail.data[currentMaterialIndex + 1]
+            return `/learn/${academyDetail.slug}?material=${nextMaterial.slug}&content=1`
+        }
+
+        // At last content of last material - no next
+        return null
+    }, [isLoading, academyDetail, currentMaterialIndex, contentOrder])
 
     if (isLoading) {
         return (
@@ -49,10 +82,8 @@ export default function MaterialContentFooter({
 
     return (
         <CardFooter className="flex justify-between">
-            {prevSlug ? (
-                <Link
-                    href={`/learn/${data?.academy.slug}?material=${prevSlug}`}
-                >
+            {prevUrl ? (
+                <Link href={prevUrl}>
                     <Button className="flex items-center gap-2" variant="ghost">
                         <ChevronLeft size={18} />
                         <p>Sebelumnya</p>
@@ -61,10 +92,8 @@ export default function MaterialContentFooter({
             ) : (
                 <div></div>
             )}
-            {nextSlug && (
-                <Link
-                    href={`/learn/${data?.academy.slug}?material=${nextSlug}`}
-                >
+            {nextUrl && (
+                <Link href={nextUrl}>
                     <Button className="flex items-center gap-2">
                         <p>Selanjutnya</p>
                         <ChevronRight size={18} />

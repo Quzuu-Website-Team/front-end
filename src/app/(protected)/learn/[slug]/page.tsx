@@ -6,8 +6,8 @@ import MaterialHeader from "./containers/MaterialHeader"
 import MaterialNav from "./containers/MaterialNav"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
-    useGetAcademyMaterialDetail,
-    useGetDetailAcademy,
+    useGetAcademyMaterialContent,
+    useGetAcademyMaterials,
 } from "@/lib/queries/academy"
 import AcademyMaterialError from "./containers/MaterialError"
 
@@ -23,24 +23,25 @@ export default function AcademyMaterial({
         data: academyDetail,
         isLoading: isLoadingAcademy,
         isError: isErrorAcademy,
-    } = useGetDetailAcademy(params.slug)
+    } = useGetAcademyMaterials(params.slug)
     const {
-        data: materialDetail,
-        isLoading: isLoadingMaterial,
-        isError: isErrorMaterial,
-    } = useGetAcademyMaterialDetail(
+        data: materialContent,
+        isLoading: isLoadingMaterialContent,
+        isError: isErrorMaterialContent,
+    } = useGetAcademyMaterialContent(
         params.slug,
         queryParams.get("material") || "",
+        Number(queryParams.get("content") || "1"),
     )
 
     useEffect(() => {
         if (
-            !queryParams.get("material") &&
+            (!queryParams.get("material") || !queryParams.get("content")) &&
             academyDetail &&
             !isLoadingAcademy
         ) {
             router.push(
-                `${pathname}?material=${academyDetail.materials[0].slug}`,
+                `${pathname}?material=${academyDetail.data[0].slug}&content=1`,
             )
         }
     }, [pathname, academyDetail, isLoadingAcademy, queryParams, router])
@@ -59,9 +60,9 @@ export default function AcademyMaterial({
                 />
                 <MaterialContent
                     academyDetail={academyDetail}
-                    academyMaterial={materialDetail}
-                    isLoading={isLoadingAcademy || isLoadingMaterial}
-                    isError={isErrorMaterial}
+                    academyMaterialContent={materialContent}
+                    isLoading={isLoadingAcademy || isLoadingMaterialContent}
+                    isError={isErrorMaterialContent}
                 />
             </div>
         </div>

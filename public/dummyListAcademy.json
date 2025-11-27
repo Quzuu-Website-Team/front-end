@@ -6,30 +6,45 @@
             "title": "Fundamental Algoritma & Struktur Data",
             "slug": "fundamental-algoritma-struktur-data",
             "description": "Pelajari konsep inti pemrograman, mulai dari algoritma dasar hingga implementasi struktur data penting.",
-            "progress": 33,
-            "total_materials": 3,
+            "materials_count": 3,
             "image_url": "/images/acad_fundamental_sd.png",
-            "status": "in_progress"
+            "academy_progresses": {
+                "id": "de219a54-2fe3-4cff-a102-185d6884fb06",
+                "status": "IN_PROGRESS",
+                "progress": 33,
+                "total_completed_materials": 1,
+                "completed_at": null
+            }
         },
         {
             "id": "acad-002",
             "title": "Jaringan Komputer & Cyber Security",
             "slug": "jaringan-komputer-cyber-security",
             "description": "Modul untuk memahami arsitektur jaringan, protokol TCP/IP, dan dasar-dasar keamanan siber.",
-            "progress": 0,
-            "total_materials": 3,
+            "materials_count": 3,
             "image_url": "/images/acad_jaringan.png",
-            "status": "not_started"
+            "academy_progresses": {
+                "id": "de219a54-2fe3-4cff-a102-185d6884fb06",
+                "status": "NOT_STARTED",
+                "progress": 0,
+                "total_completed_materials": 0,
+                "completed_at": null
+            }
         },
         {
             "id": "acad-003",
             "title": "Pengantar Kecerdasan Artifisial (AI)",
             "slug": "pengantar-kecerdasan-artifisial",
             "description": "Jelajahi dasar-dasar AI, Machine Learning, Deep Learning, dan penerapannya.",
-            "progress": 100,
-            "total_materials": 3,
+            "materials_count": 3,
             "image_url": "/images/acad_ai_ml.png",
-            "status": "finished"
+            "academy_progresses": {
+                "id": "de219a54-2fe3-4cff-a102-185d6884fb06",
+                "status": "FINISHED",
+                "progress": 100,
+                "total_completed_materials": 3,
+                "completed_at": null
+            }
         }
     ],
     "message": "Successfully retrieved academy list.",

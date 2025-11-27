@@ -1,4 +1,4 @@
-import { AcademyDetail } from "@/types/academy"
+import { Academy } from "@/types/academy"
 import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -6,7 +6,7 @@ export default function MaterialHeader({
     data,
     isLoading,
 }: {
-    data?: AcademyDetail
+    data?: Academy
     isLoading: boolean
 }) {
     if (isLoading) {
@@ -27,7 +27,7 @@ export default function MaterialHeader({
                 <p>Kembali</p>
             </Link>
             <p>/</p>
-            <p>{data?.academy.title}</p>
+            <p>{data?.title}</p>
         </div>
     )
 }

@@ -1,43 +1,64 @@
 import { ListData, ResponseData } from "./common"
 
+export type AcademyStatus = "NOT_STARTED" | "IN_PROGRESS" | "FINISHED"
+
+// Progress Sub-Interfaces
+export interface AcademyProgress {
+    id: string
+    status: AcademyStatus
+    progress: number
+    total_completed_materials: number
+    completed_at: string
+}
+
+export interface AcademyMaterialProgress {
+    id: string
+    status: AcademyStatus
+    progress: number
+    total_completed_contents: number
+}
+
+export interface AcademyContentProgress {
+    id: string
+    status: AcademyStatus
+    completed_at: string
+}
+
+// Main Entities
 export interface Academy {
     id: string
     title: string
-    slug: string
     description: string
-    progress: number
-    total_materials: number
-    image_url: string | null
-    status: "finished" | "in_progress" | "not_started"
-}
-
-export interface AcademyDetail {
-    academy: Academy
-    materials: AcademyMaterial[]
+    slug: string
+    materials_count: number
+    image_url?: string
+    // Nested Object mapped from JSON key "academy_progresses"
+    academy_progresses?: AcademyProgress
+    data: AcademyMaterial[]
 }
 
 export interface AcademyMaterial {
     id: string
-    academy_id: string
     title: string
     slug: string
-    description: string
+    order: number
+    contents_count: number
+    // Nested Object mapped from JSON key "academy_material_progresses"
+    academy_material_progresses?: AcademyMaterialProgress
+    contents?: AcademyMaterialContent[]
 }
 
-export interface AcademyMaterialDetail {
-    material: AcademyMaterial
-    contents: AcademyContent[]
-}
-
-export interface AcademyContent {
+export interface AcademyMaterialContent {
     id: string
-    academy_material_id: string
+    material_id: string
     title: string
     order: number
     contents: string
+    // Nested Object mapped from JSON key "academy_content_progresses"
+    academy_content_progresses?: AcademyContentProgress
 }
 
 export interface AcademyListResponse extends ListData<Academy> {}
-export interface AcademyDetailResponse extends ResponseData<AcademyDetail> {}
-export interface AcademyMaterialDetailResponse
-    extends ResponseData<AcademyMaterialDetail> {}
+export interface AcademyDetailResponse extends ResponseData<Academy> {}
+export interface AcademyMaterialContentResponse
+    extends ResponseData<AcademyMaterialContent> {}

@@ -1,37 +1,113 @@
 {
     "status": "success",
     "data": {
-        "academy": {
-            "id": "acad-001",
-            "title": "Fundamental Algoritma & Struktur Data",
-            "slug": "fundamental-algoritma-struktur-data",
-            "description": "Pelajari konsep inti pemrograman, mulai dari algoritma dasar hingga implementasi struktur data penting.",
-            "progress": 33,
-            "total_materials": 3,
-            "image_url": "/images/acad_fundamental_sd.png",
-            "status": "in_progress"
+        "id": "acad-001",
+        "title": "Fundamental Algoritma & Struktur Data",
+        "slug": "fundamental-algoritma-struktur-data",
+        "description": "Pelajari konsep inti pemrograman, mulai dari algoritma dasar hingga implementasi struktur data penting.",
+        "materials_count": 3,
+        "image_url": "https://t4.ftcdn.net/jpg/17/81/02/69/360_F_1781026912_lXBzujDZKSWf07fb9zz2JCYEynVW6oA5.jpg",
+        "academy_progresses": {
+            "id": "de219a54-2fe3-4cff-a102-185d6884fb06",
+            "account_id": "53bdf314-40df-4505-9792-4a50873de7f9",
+            "academy_id": "b4bf9759-a9af-402a-95d8-db1367c68720",
+            "status": "IN_PROGRESS",
+            "progress": 50,
+            "total_completed_materials": 1,
+            "completed_at": null
         },
-        "materials": [
+        "data": [
             {
                 "id": "mat-001-01",
-                "academy_id": "acad-001",
                 "title": "Pengantar Algoritma dan Kompleksitas",
                 "slug": "pengantar-algoritma-kompleksitas",
-                "description": "Memahami apa itu algoritma dan cara mengukur efisiensinya menggunakan Notasi Big O."
+                "order": 1,
+                "status": "IN_PROGRESS",
+                "contents_count": 2,
+                "contents": [
+                    {
+                        "id": "submat-001-01-01",
+                        "title": "Apa itu Algoritma?",
+                        "order": 1,
+                        "academy_content_progresses": {
+                            "id": "prog-001-01-01",
+                            "status": "FINISHED",
+                            "completed_at": "2025-11-20T10:30:00Z"
+                        }
+                    },
+                    {
+                        "id": "submat-001-01-02",
+                        "title": "Notasi Big O",
+                        "order": 2,
+                        "academy_content_progresses": {
+                            "id": "prog-001-01-02",
+                            "status": "IN_PROGRESS",
+                            "completed_at": null
+                        }
+                    }
+                ]
             },
             {
                 "id": "mat-001-02",
-                "academy_id": "acad-001",
                 "title": "Struktur Data Linear",
                 "slug": "struktur-data-linear",
-                "description": "Mempelajari implementasi Stack, Queue, dan Linked List."
+                "order": 2,
+                "status": "FINISHED",
+                "contents_count": 2,
+                "contents": [
+                    {
+                        "id": "submat-001-02-01",
+                        "title": "Array dan Linked List",
+                        "order": 1,
+                        "academy_content_progresses": {
+                            "id": "prog-001-02-01",
+                            "status": "FINISHED",
+                            "completed_at": "2025-11-22T09:15:00Z"
+                        }
+                    },
+                    {
+                        "id": "submat-001-02-02",
+                        "title": "Stack dan Queue",
+                        "order": 2,
+                        "academy_content_progresses": {
+                            "id": "prog-001-02-02",
+                            "status": "FINISHED",
+                            "completed_at": "2025-11-23T14:45:00Z"
+                        }
+                    }
+                ]
             },
             {
                 "id": "mat-001-03",
-                "academy_id": "acad-001",
                 "title": "Pencarian dan Pengurutan",
                 "slug": "pencarian-pengurutan",
-                "description": "Menganalisis algoritma pencarian (Linear dan Binary) dan pengurutan (Merge, Quick)."
+                "order": 3,
+                "status": "NOT_STARTED",
+                "contents_count": 2,
+                "contents": [
+                    {
+                        "id": "submat-001-03-01",
+                        "title": "Algoritma Pencarian",
+                        "order": 1,
+                        "status": "NOT_STARTED",
+                        "academy_content_progresses": {
+                            "id": "prog-001-03-01",
+                            "status": "NOT_STARTED",
+                            "completed_at": null
+                        }
+                    },
+                    {
+                        "id": "submat-001-03-02",
+                        "title": "Algoritma Pengurutan",
+                        "order": 2,
+                        "status": "NOT_STARTED",
+                        "academy_content_progresses": {
+                            "id": "prog-001-03-02",
+                            "status": "NOT_STARTED",
+                            "completed_at": null
+                        }
+                    }
+                ]
             }
         ]
     },
