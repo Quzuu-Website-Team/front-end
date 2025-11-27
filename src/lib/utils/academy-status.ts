@@ -1,12 +1,14 @@
+import { AcademyStatus } from "@/types/academy"
+
 export const mapAcademyStatus = (
-    status: "finished" | "in_progress" | "not_started",
+    status: AcademyStatus,
 ): { label: string; variant: "success" | "info" | "default" } => {
     switch (status) {
-        case "finished":
+        case "FINISHED":
             return { label: "Finished", variant: "success" }
-        case "in_progress":
+        case "IN_PROGRESS":
             return { label: "In Progress", variant: "info" }
-        case "not_started":
+        case "NOT_STARTED":
             return { label: "Not Started", variant: "default" }
         default:
             return { label: "Unknown", variant: "default" }

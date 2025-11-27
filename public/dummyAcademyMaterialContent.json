@@ -1,0 +1,85 @@
+{
+    "status": "success",
+    "data": [
+        {
+            "id": "submat-001-01-01",
+            "academy_material_id": "mat-001-01",
+            "material_slug": "pengantar-algoritma-kompleksitas",
+            "title": "Apa itu Algoritma?",
+            "order": 1,
+            "contents": "<p><strong>Algoritma</strong> adalah sekumpulan instruksi atau langkah-langkah logis yang disusun secara sistematis untuk menyelesaikan suatu masalah tertentu.</p><p>Dalam pemrograman, algoritma bertindak sebagai resep yang memberi tahu komputer apa yang harus dilakukan langkah demi langkah.</p>",
+            "academy_content_progresses": {
+                "id": "prog-001-01-01",
+                "status": "FINISHED",
+                "completed_at": "2025-11-20T10:30:00Z"
+            }
+        },
+        {
+            "id": "submat-001-01-02",
+            "academy_material_id": "mat-001-01",
+            "material_slug": "pengantar-algoritma-kompleksitas",
+            "title": "Notasi Big O",
+            "order": 2,
+            "contents": "<p><strong>Notasi Big O</strong> digunakan untuk mengukur tingkat efisiensi suatu algoritma, baik dari segi waktu (<em>Time Complexity</em>) maupun ruang (<em>Space Complexity</em>).</p><ul><li><strong>O(1)</strong>: Konstan (tercepat).</li><li><strong>O(n)</strong>: Linear.</li><li><strong>O(n^2)</strong>: Kuadratik (kurang efisien untuk data besar).</li></ul>",
+            "academy_content_progresses": {
+                "id": "prog-001-01-02",
+                "status": "IN_PROGRESS",
+                "completed_at": null
+            }
+        },
+        {
+            "id": "submat-001-02-01",
+            "academy_material_id": "mat-001-02",
+            "material_slug": "struktur-data-linear",
+            "title": "Array dan Linked List",
+            "order": 1,
+            "contents": "<p>Perbedaan utama antara <strong>Array</strong> dan <strong>Linked List</strong> terletak pada cara penyimpanan memori.</p><p><em>Array</em> menyimpan data di blok memori yang bersebelahan (kontigu), sehingga akses data sangat cepat. Sebaliknya, <em>Linked List</em> menyimpan data secara terpisah yang dihubungkan melalui <em>pointer</em>, yang memungkinkan penambahan data lebih fleksibel.</p>",
+            "academy_content_progresses": {
+                "id": "prog-001-02-01",
+                "status": "FINISHED",
+                "completed_at": "2025-11-22T09:15:00Z"
+            }
+        },
+        {
+            "id": "submat-001-02-02",
+            "academy_material_id": "mat-001-02",
+            "material_slug": "struktur-data-linear",
+            "title": "Stack dan Queue",
+            "order": 2,
+            "contents": "<p><strong>Stack</strong> menggunakan prinsip <em>LIFO (Last In, First Out)</em>, ibarat tumpukan piring di mana yang terakhir ditaruh adalah yang pertama diambil.</p><p><strong>Queue</strong> menggunakan prinsip <em>FIFO (First In, First Out)</em>, seperti antrean orang di kasir, di mana yang datang duluan akan dilayani duluan.</p>",
+            "academy_content_progresses": {
+                "id": "prog-001-02-02",
+                "status": "FINISHED",
+                "completed_at": "2025-11-23T14:45:00Z"
+            }
+        },
+        {
+            "id": "submat-001-03-01",
+            "academy_material_id": "mat-001-03",
+            "material_slug": "pencarian-pengurutan",
+            "title": "Algoritma Pencarian",
+            "order": 1,
+            "contents": "<p>Ada dua jenis algoritma pencarian dasar:</p><ol><li><strong>Linear Search:</strong> Mencari data satu per satu dari awal hingga akhir. Sederhana tapi lambat.</li><li><strong>Binary Search:</strong> Mencari data dengan membagi dua himpunan data. Jauh lebih cepat (O(log n)) namun data harus dalam keadaan terurut.</li></ol>",
+            "academy_content_progresses": {
+                "id": "prog-001-03-01",
+                "status": "NOT_STARTED",
+                "completed_at": null
+            }
+        },
+        {
+            "id": "submat-001-03-02",
+            "academy_material_id": "mat-001-03",
+            "material_slug": "pencarian-pengurutan",
+            "title": "Algoritma Pengurutan",
+            "order": 2,
+            "contents": "<p>Pengurutan atau <em>Sorting</em> adalah proses menyusun data dalam urutan tertentu (ascending atau descending).</p><p>Contoh algoritma populer meliputi <strong>Bubble Sort</strong> (sederhana, lambat), <strong>Merge Sort</strong> (cepat, stabil), dan <strong>Quick Sort</strong> (sangat cepat dalam praktiknya).</p>",
+            "academy_content_progresses": {
+                "id": "prog-001-03-02",
+                "status": "NOT_STARTED",
+                "completed_at": null
+            }
+        }
+    ],
+    "message": "Successfully retrieved material contents.",
+    "meta_data": {}
+}

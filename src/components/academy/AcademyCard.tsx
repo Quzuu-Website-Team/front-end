@@ -19,14 +19,15 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
         slug,
         description,
         image_url,
-        progress,
-        total_materials,
-        status,
+        academy_progresses,
+        materials_count,
     } = academy
 
     const [imageSrc, setImageSrc] = useState(image_url || fallbackImage)
 
-    const mappedStatus = mapAcademyStatus(status)
+    const mappedStatus = mapAcademyStatus(
+        academy_progresses?.status || "NOT_STARTED",
+    )
     return (
         <Link
             href={`/learn/${slug}`}
@@ -57,15 +58,18 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
                 <div className="flex flex-col">
                     <div className="flex justify-between items-center">
                         <p>Progress</p>
-                        <p>{progress}%</p>
+                        <p>{academy_progresses?.progress || 0}%</p>
                     </div>
-                    <Progress value={progress} className="w-full mt-1" />
+                    <Progress
+                        value={academy_progresses?.progress || 0}
+                        className="w-full mt-1"
+                    />
                 </div>
 
                 <div className="flex justify-between gap-4">
                     <div className="flex items-center gap-1">
                         <BookText size={20} />
-                        <p>{total_materials} Materi</p>
+                        <p>{materials_count} Materi</p>
                     </div>
 
                     <Badge variant={mappedStatus.variant} className="px-2 py-1">
