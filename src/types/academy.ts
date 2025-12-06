@@ -5,10 +5,12 @@ export type AcademyStatus = "NOT_STARTED" | "IN_PROGRESS" | "FINISHED"
 // Progress Sub-Interfaces
 export interface AcademyProgress {
     id: string
+    account_id: string
+    academy_id: string
     status: AcademyStatus
     progress: number
     total_completed_materials: number
-    completed_at: string
+    completed_at: string | null
 }
 
 export interface AcademyMaterialProgress {
@@ -31,10 +33,10 @@ export interface Academy {
     description: string
     slug: string
     materials_count: number
+    register_status: boolean
     image_url?: string
-    // Nested Object mapped from JSON key "academy_progresses"
-    academy_progresses?: AcademyProgress
-    data: AcademyMaterial[]
+    academy_progress?: AcademyProgress
+    materials?: AcademyMaterial[]
 }
 
 export interface AcademyMaterial {
@@ -43,7 +45,6 @@ export interface AcademyMaterial {
     slug: string
     order: number
     contents_count: number
-    // Nested Object mapped from JSON key "academy_material_progresses"
     academy_material_progresses?: AcademyMaterialProgress
     contents?: AcademyMaterialContent[]
 }
@@ -54,7 +55,7 @@ export interface AcademyMaterialContent {
     title: string
     order: number
     contents: string
-    // Nested Object mapped from JSON key "academy_content_progresses"
+    status: AcademyStatus // For list materials
     academy_content_progresses?: AcademyContentProgress
 }
 

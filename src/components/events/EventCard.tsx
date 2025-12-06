@@ -35,6 +35,7 @@ export function EventCard({ event }: EventCardProps) {
                     alt={title}
                     onError={() => setImageSrc(fallbackImage)}
                     fill
+                    unoptimized
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
 

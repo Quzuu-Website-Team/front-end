@@ -1,20 +1,28 @@
 import { Button } from "@/components/ui/button"
 import { CardFooter } from "@/components/ui/card"
 import { Academy } from "@/types/academy"
+import { UseMutateFunction } from "@tanstack/react-query"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import React, { useMemo } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import React, { useCallback, useMemo } from "react"
+import { toast } from "@/hooks/use-toast"
+
+interface MaterialContentFooterProps {
+    academyDetail?: Academy
+    isLoading: boolean
+    contentOrder: number
+    nextIsLoading?: boolean
+    onNext: UseMutateFunction
+}
 
 export default function MaterialContentFooter({
     academyDetail,
     isLoading,
     contentOrder,
-}: {
-    academyDetail?: Academy
-    isLoading: boolean
-    contentOrder: number
-}) {
+    nextIsLoading,
+    onNext,
+}: MaterialContentFooterProps) {
     const queryParams = useSearchParams()
     const materialSlug = useMemo(
         () => queryParams.get("material") || "",
@@ -22,18 +30,23 @@ export default function MaterialContentFooter({
     )
 
     const currentMaterialIndex = useMemo(() => {
-        if (isLoading || !academyDetail) return -1
+        if (isLoading || !academyDetail || !academyDetail.materials) return -1
 
-        return academyDetail.data.findIndex(
+        return academyDetail.materials.findIndex(
             (material) => material.slug === materialSlug,
         )
     }, [isLoading, academyDetail, materialSlug])
 
     const prevUrl = useMemo(() => {
-        if (isLoading || !academyDetail || currentMaterialIndex === -1)
+        if (
+            isLoading ||
+            !academyDetail ||
+            !academyDetail.materials ||
+            currentMaterialIndex === -1
+        )
             return null
 
-        const currentMaterial = academyDetail.data[currentMaterialIndex]
+        const currentMaterial = academyDetail.materials[currentMaterialIndex]
 
         // If not at first content of current material, go to previous content
         if (contentOrder > 1) {
@@ -42,7 +55,8 @@ export default function MaterialContentFooter({
 
         // If at first content but not at first material, go to last content of previous material
         if (currentMaterialIndex > 0) {
-            const prevMaterial = academyDetail.data[currentMaterialIndex - 1]
+            const prevMaterial =
+                academyDetail.materials[currentMaterialIndex - 1]
             return `/learn/${academyDetail.slug}?material=${prevMaterial.slug}&content=${prevMaterial.contents_count}`
         }
 
@@ -51,10 +65,15 @@ export default function MaterialContentFooter({
     }, [isLoading, academyDetail, currentMaterialIndex, contentOrder])
 
     const nextUrl = useMemo(() => {
-        if (isLoading || !academyDetail || currentMaterialIndex === -1)
+        if (
+            isLoading ||
+            !academyDetail ||
+            !academyDetail.materials ||
+            currentMaterialIndex === -1
+        )
             return null
 
-        const currentMaterial = academyDetail.data[currentMaterialIndex]
+        const currentMaterial = academyDetail.materials[currentMaterialIndex]
 
         // If not at last content of current material, go to next content
         if (contentOrder < currentMaterial.contents_count) {
@@ -62,14 +81,58 @@ export default function MaterialContentFooter({
         }
 
         // If at last content but not at last material, go to first content of next material
-        if (currentMaterialIndex < academyDetail.data.length - 1) {
-            const nextMaterial = academyDetail.data[currentMaterialIndex + 1]
+        if (currentMaterialIndex < academyDetail.materials.length - 1) {
+            const nextMaterial =
+                academyDetail.materials[currentMaterialIndex + 1]
             return `/learn/${academyDetail.slug}?material=${nextMaterial.slug}&content=1`
         }
 
         // At last content of last material - no next
         return null
     }, [isLoading, academyDetail, currentMaterialIndex, contentOrder])
+
+    const router = useRouter()
+    const handleNext = useCallback(() => {
+        const currentMaterialContent = academyDetail?.materials?.[
+            currentMaterialIndex
+        ]?.contents?.find((content) => content.order === contentOrder)
+
+        if (currentMaterialContent?.status === "FINISHED") {
+            if (nextUrl) {
+                router.push(nextUrl)
+            }
+        }
+
+        // only mark as read if not finished
+        onNext(undefined, {
+            onSuccess: () => {
+                toast({
+                    title: "Success update progress",
+                    description:
+                        "You have successfully update your learning progress.",
+                })
+            },
+            onError: (error) => {
+                toast({
+                    title: "Error",
+                    description: `Failed to update progress: ${error.message}`,
+                    variant: "destructive",
+                })
+            },
+            onSettled: () => {
+                if (nextUrl) {
+                    router.push(nextUrl)
+                }
+            },
+        })
+    }, [
+        nextUrl,
+        router,
+        onNext,
+        academyDetail,
+        currentMaterialIndex,
+        contentOrder,
+    ])
 
     if (isLoading) {
         return (
@@ -93,12 +156,14 @@ export default function MaterialContentFooter({
                 <div></div>
             )}
             {nextUrl && (
-                <Link href={nextUrl}>
-                    <Button className="flex items-center gap-2">
-                        <p>Selanjutnya</p>
-                        <ChevronRight size={18} />
-                    </Button>
-                </Link>
+                <Button
+                    className="flex items-center gap-2"
+                    iconRight={<ChevronRight size={18} />}
+                    isLoading={nextIsLoading}
+                    onClick={handleNext}
+                >
+                    <p>Selanjutnya</p>
+                </Button>
             )}
         </CardFooter>
     )

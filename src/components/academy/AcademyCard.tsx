@@ -19,14 +19,14 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
         slug,
         description,
         image_url,
-        academy_progresses,
+        academy_progress,
         materials_count,
     } = academy
 
     const [imageSrc, setImageSrc] = useState(image_url || fallbackImage)
 
     const mappedStatus = mapAcademyStatus(
-        academy_progresses?.status || "NOT_STARTED",
+        academy_progress?.status || "NOT_STARTED",
     )
     return (
         <Link
@@ -41,6 +41,7 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
                     onError={() => setImageSrc(fallbackImage)}
                     fill
                     loading="lazy"
+                    unoptimized
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
             </div>
@@ -58,10 +59,10 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
                 <div className="flex flex-col">
                     <div className="flex justify-between items-center">
                         <p>Progress</p>
-                        <p>{academy_progresses?.progress || 0}%</p>
+                        <p>{academy_progress?.progress || 0}%</p>
                     </div>
                     <Progress
-                        value={academy_progresses?.progress || 0}
+                        value={academy_progress?.progress || 0}
                         className="w-full mt-1"
                     />
                 </div>

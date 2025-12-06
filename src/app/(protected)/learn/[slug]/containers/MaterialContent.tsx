@@ -7,18 +7,23 @@ import MaterialContentFooter from "./MaterialContentFooter"
 import MaterialContentLoading from "./MaterialContentLoading"
 import { Academy, AcademyMaterialContent } from "@/types/academy"
 import { BookX } from "lucide-react"
+import WelcomingContent from "./WelcomingContent"
+import { UseMutationResult } from "@tanstack/react-query"
 
+interface MaterialContentProps {
+    academyDetail?: Academy
+    academyMaterialContent?: AcademyMaterialContent
+    isLoading: boolean
+    isError: boolean
+    markAsReadMutation: UseMutationResult<Boolean, Error, void, unknown>
+}
 export default function MaterialContent({
     academyDetail,
     academyMaterialContent,
     isLoading,
     isError,
-}: {
-    academyDetail?: Academy
-    academyMaterialContent?: AcademyMaterialContent
-    isLoading: boolean
-    isError: boolean
-}) {
+    markAsReadMutation,
+}: MaterialContentProps) {
     const sanitizeContent = (content?: string) => {
         if (!content) return ""
         return DOMPurify.sanitize(content)
@@ -26,7 +31,7 @@ export default function MaterialContent({
 
     const academyMaterial = useMemo(
         () =>
-            academyDetail?.data.find(
+            academyDetail?.materials?.find(
                 (material) =>
                     material.id == academyMaterialContent?.material_id,
             ),
@@ -35,6 +40,10 @@ export default function MaterialContent({
 
     if (isLoading) {
         return <MaterialContentLoading />
+    }
+
+    if (!academyDetail?.register_status && !isError) {
+        return <WelcomingContent />
     }
 
     if (isError || !academyMaterialContent) {
@@ -79,6 +88,8 @@ export default function MaterialContent({
                 academyDetail={academyDetail}
                 isLoading={isLoading}
                 contentOrder={academyMaterialContent.order}
+                onNext={markAsReadMutation.mutate}
+                nextIsLoading={markAsReadMutation.isPending}
             />
         </Card>
     )

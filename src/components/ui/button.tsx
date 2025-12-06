@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { useRipple } from "@/hooks/use-ripple"
+import { LoaderCircle } from "lucide-react"
 
 const buttonVariants = cva(
     "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 relative overflow-hidden",
@@ -43,6 +44,7 @@ export interface ButtonProps
     asChild?: boolean
     iconLeft?: React.ReactNode
     iconRight?: React.ReactNode
+    isLoading?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -56,6 +58,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             iconLeft,
             iconRight,
             children,
+            isLoading,
             ...props
         },
         ref,
@@ -69,7 +72,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         }
         return (
             <Comp
-                className={cn(buttonVariants({ variant, size, className }))}
+                className={cn(
+                    buttonVariants({ variant, size, className }),
+                    isLoading && "pointer-events-none animate-pulse",
+                )}
                 ref={ref}
                 onClick={handleClick}
                 {...props}
@@ -80,10 +86,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     </span>
                 )}
                 {children}
-                {iconRight && (
+                {iconRight && !isLoading && (
                     <span className="ml-2 inline-flex items-center">
                         {iconRight}
                     </span>
+                )}
+
+                {isLoading && (
+                    <LoaderCircle className="ml-2 h-4 w-4 animate-spin" />
                 )}
             </Comp>
         )
