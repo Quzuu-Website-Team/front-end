@@ -40,7 +40,7 @@ export default function MaterialNav({
                         .map((_, index) => {
                             return (
                                 <div
-                                    key={index}
+                                    key={`loading-material-${index}`}
                                     className="h-11 w-full bg-gray-200 rounded-lg animate-pulse"
                                 ></div>
                             )
@@ -65,14 +65,12 @@ export default function MaterialNav({
                                 <div className="flex justify-between items-center">
                                     <p>Progress</p>
                                     <p>
-                                        {data?.academy_progresses?.progress ||
-                                            0}
-                                        %
+                                        {data?.academy_progress?.progress || 0}%
                                     </p>
                                 </div>
                                 <Progress
                                     value={
-                                        data?.academy_progresses?.progress || 0
+                                        data?.academy_progress?.progress || 0
                                     }
                                     className="w-full mt-1"
                                 />
@@ -83,96 +81,100 @@ export default function MaterialNav({
                                 defaultValue={[activeMaterialSlug]}
                                 key={activeMaterialSlug}
                             >
-                                {data?.data.map((material) => {
-                                    const isActiveMaterial =
-                                        activeMaterialSlug === material.slug
-                                    return (
-                                        <AccordionItem
-                                            value={material.slug}
-                                            key={material.slug}
-                                        >
-                                            <AccordionTrigger
-                                                className={cn(
-                                                    isActiveMaterial
-                                                        ? "underline"
-                                                        : "",
-                                                )}
+                                {data?.materials?.length ? (
+                                    data.materials.map((material) => {
+                                        const isActiveMaterial =
+                                            activeMaterialSlug === material.slug
+                                        return (
+                                            <AccordionItem
+                                                value={material.slug}
+                                                key={`material-nav-${material.id}`}
                                             >
-                                                <div className="flex items-center gap-1">
-                                                    {material
-                                                        .academy_material_progresses
-                                                        ?.status ===
-                                                        "FINISHED" && (
-                                                        <CheckCircle2
-                                                            size={16}
-                                                            className="text-green-700"
-                                                        />
+                                                <AccordionTrigger
+                                                    className={cn(
+                                                        isActiveMaterial
+                                                            ? "underline"
+                                                            : "",
                                                     )}
-                                                    <span>
-                                                        {material.title}
-                                                    </span>
-                                                </div>
-                                            </AccordionTrigger>
-                                            <AccordionContent className="gap-1">
-                                                {material.contents?.map(
-                                                    (content) => {
-                                                        const isActiveContent =
-                                                            queryParams.get(
-                                                                "content",
-                                                            ) ==
-                                                                content.order.toString() &&
-                                                            isActiveMaterial
-                                                        return (
-                                                            <Link
-                                                                key={content.id}
-                                                                href={`/learn/${data?.slug}?material=${material.slug}&content=${content.order}`}
-                                                                className={cn(
-                                                                    "flex items-center gap-3 px-4 py-2 rounded-lg border border-transparent hover:bg-primary-50 transition-all text-foreground",
-                                                                    isActiveContent &&
-                                                                        "text-primary font-semibold",
-                                                                )}
-                                                            >
-                                                                <span
+                                                >
+                                                    <div className="flex items-center gap-1">
+                                                        {material
+                                                            .academy_material_progresses
+                                                            ?.status ===
+                                                            "FINISHED" && (
+                                                            <CheckCircle2
+                                                                size={16}
+                                                                className="text-green-700"
+                                                            />
+                                                        )}
+                                                        <span>
+                                                            {material.title}
+                                                        </span>
+                                                    </div>
+                                                </AccordionTrigger>
+                                                <AccordionContent className="gap-1">
+                                                    {material.contents?.map(
+                                                        (content) => {
+                                                            const isActiveContent =
+                                                                queryParams.get(
+                                                                    "content",
+                                                                ) ==
+                                                                    content.order.toString() &&
+                                                                isActiveMaterial
+                                                            return (
+                                                                <Link
+                                                                    key={
+                                                                        content.id
+                                                                    }
+                                                                    href={`/learn/${data?.slug}?material=${material.slug}&content=${content.order}`}
                                                                     className={cn(
-                                                                        "text-sm rounded-full border-2 border-gray-300 font-semibold h-7 w-7 flex items-center justify-center text-gray-500",
+                                                                        "flex items-center gap-3 px-4 py-2 rounded-lg border border-transparent hover:bg-primary-50 transition-all text-foreground",
                                                                         isActiveContent &&
-                                                                            "text-primary border-primary",
+                                                                            "text-primary font-semibold",
                                                                     )}
                                                                 >
-                                                                    {
-                                                                        content.order
-                                                                    }
-                                                                </span>
-                                                                <span className="inline-block flex-1">
-                                                                    {
-                                                                        material.title
-                                                                    }
-                                                                </span>
-                                                                {content
-                                                                    .academy_content_progresses
-                                                                    ?.status ===
-                                                                    "FINISHED" && (
-                                                                    <CheckCircle2
-                                                                        size={
-                                                                            18
+                                                                    <span
+                                                                        className={cn(
+                                                                            "text-sm rounded-full border-2 border-gray-300 font-semibold h-7 w-7 flex items-center justify-center text-gray-500",
+                                                                            isActiveContent &&
+                                                                                "text-primary border-primary",
+                                                                        )}
+                                                                    >
+                                                                        {
+                                                                            content.order
                                                                         }
-                                                                        className="text-green-700"
-                                                                    />
-                                                                )}
-                                                                {content
-                                                                    .academy_content_progresses
-                                                                    ?.status ===
-                                                                    "IN_PROGRESS" && (
-                                                                    <div className="h-2 w-2 mx-1 bg-slate-400 rounded-full"></div>
-                                                                )}
-                                                            </Link>
-                                                        )
-                                                    },
-                                                )}
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    )
-                                })}
+                                                                    </span>
+                                                                    <span className="inline-block flex-1">
+                                                                        {
+                                                                            material.title
+                                                                        }
+                                                                    </span>
+                                                                    {content.status ===
+                                                                        "FINISHED" && (
+                                                                        <CheckCircle2
+                                                                            size={
+                                                                                18
+                                                                            }
+                                                                            className="text-green-700"
+                                                                        />
+                                                                    )}
+                                                                    {content.status ===
+                                                                        "IN_PROGRESS" && (
+                                                                        <div className="h-2 w-2 mx-1 bg-slate-400 rounded-full"></div>
+                                                                    )}
+                                                                </Link>
+                                                            )
+                                                        },
+                                                    )}
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        )
+                                    })
+                                ) : (
+                                    <p>
+                                        Material not available for this learn.
+                                    </p>
+                                )}
                             </Accordion>
                         </CardContent>
                     </AccordionContent>

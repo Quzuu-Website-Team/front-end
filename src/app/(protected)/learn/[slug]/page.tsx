@@ -8,6 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
     useGetAcademyMaterialContent,
     useGetAcademyMaterials,
+    usePostMarkContentAsRead,
 } from "@/lib/queries/academy"
 import AcademyMaterialError from "./containers/MaterialError"
 
@@ -24,6 +25,7 @@ export default function AcademyMaterial({
         isLoading: isLoadingAcademy,
         isError: isErrorAcademy,
     } = useGetAcademyMaterials(params.slug)
+
     const {
         data: materialContent,
         isLoading: isLoadingMaterialContent,
@@ -34,14 +36,22 @@ export default function AcademyMaterial({
         Number(queryParams.get("content") || "1"),
     )
 
+    const markAsReadMutation = usePostMarkContentAsRead(
+        params.slug,
+        queryParams.get("material") || "",
+        Number(queryParams.get("content") || "1"),
+    )
+
     useEffect(() => {
         if (
             (!queryParams.get("material") || !queryParams.get("content")) &&
             academyDetail &&
-            !isLoadingAcademy
+            !isLoadingAcademy &&
+            academyDetail.materials?.length &&
+            academyDetail.register_status
         ) {
             router.push(
-                `${pathname}?material=${academyDetail.data[0].slug}&content=1`,
+                `${pathname}?material=${academyDetail.materials[0].slug}&content=1`,
             )
         }
     }, [pathname, academyDetail, isLoadingAcademy, queryParams, router])
@@ -63,6 +73,7 @@ export default function AcademyMaterial({
                     academyMaterialContent={materialContent}
                     isLoading={isLoadingAcademy || isLoadingMaterialContent}
                     isError={isErrorMaterialContent}
+                    markAsReadMutation={markAsReadMutation}
                 />
             </div>
         </div>
