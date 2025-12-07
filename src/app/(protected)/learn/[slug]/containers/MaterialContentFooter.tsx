@@ -37,7 +37,7 @@ export default function MaterialContentFooter({
         )
     }, [isLoading, academyDetail, materialSlug])
 
-    const prevUrl = useMemo(() => {
+    const currentMaterial = useMemo(() => {
         if (
             isLoading ||
             !academyDetail ||
@@ -46,7 +46,17 @@ export default function MaterialContentFooter({
         )
             return null
 
-        const currentMaterial = academyDetail.materials[currentMaterialIndex]
+        return academyDetail.materials[currentMaterialIndex]
+    }, [isLoading, academyDetail, currentMaterialIndex])
+
+    const prevUrl = useMemo(() => {
+        if (
+            isLoading ||
+            !academyDetail ||
+            !academyDetail.materials ||
+            !currentMaterial
+        )
+            return null
 
         // If not at first content of current material, go to previous content
         if (contentOrder > 1) {
@@ -62,18 +72,43 @@ export default function MaterialContentFooter({
 
         // At first content of first material - no previous
         return null
-    }, [isLoading, academyDetail, currentMaterialIndex, contentOrder])
+    }, [
+        isLoading,
+        academyDetail,
+        currentMaterialIndex,
+        contentOrder,
+        currentMaterial,
+    ])
+
+    const isLastContent = useMemo(() => {
+        if (
+            isLoading ||
+            !academyDetail ||
+            !academyDetail.materials ||
+            !currentMaterial
+        )
+            return false
+
+        return (
+            currentMaterialIndex === academyDetail.materials_count - 1 &&
+            contentOrder === currentMaterial.contents_count
+        )
+    }, [
+        isLoading,
+        academyDetail,
+        currentMaterialIndex,
+        contentOrder,
+        currentMaterial,
+    ])
 
     const nextUrl = useMemo(() => {
         if (
             isLoading ||
             !academyDetail ||
             !academyDetail.materials ||
-            currentMaterialIndex === -1
+            !currentMaterial
         )
             return null
-
-        const currentMaterial = academyDetail.materials[currentMaterialIndex]
 
         // If not at last content of current material, go to next content
         if (contentOrder < currentMaterial.contents_count) {
@@ -89,7 +124,13 @@ export default function MaterialContentFooter({
 
         // At last content of last material - no next
         return null
-    }, [isLoading, academyDetail, currentMaterialIndex, contentOrder])
+    }, [
+        isLoading,
+        academyDetail,
+        currentMaterialIndex,
+        contentOrder,
+        currentMaterial,
+    ])
 
     const router = useRouter()
     const handleNext = useCallback(() => {
@@ -149,7 +190,7 @@ export default function MaterialContentFooter({
                 <Link href={prevUrl}>
                     <Button className="flex items-center gap-2" variant="ghost">
                         <ChevronLeft size={18} />
-                        <p>Sebelumnya</p>
+                        <p>Previous</p>
                     </Button>
                 </Link>
             ) : (
@@ -162,7 +203,16 @@ export default function MaterialContentFooter({
                     isLoading={nextIsLoading}
                     onClick={handleNext}
                 >
-                    <p>Selanjutnya</p>
+                    <p>Next</p>
+                </Button>
+            )}
+            {isLastContent && currentMaterial?.status !== "FINISHED" && (
+                <Button
+                    className="flex items-center gap-2"
+                    isLoading={nextIsLoading}
+                    onClick={handleNext}
+                >
+                    <p>Finish Learning</p>
                 </Button>
             )}
         </CardFooter>

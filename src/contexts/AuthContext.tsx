@@ -316,8 +316,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (
                 error instanceof Error &&
-                (error.message.includes("Token expired") ||
-                    error.message.includes("API error: 401"))
+                error.message.includes("Token expired")
             ) {
                 // Clear expired token
                 removeAuthToken()

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { Academy } from "@/types/academy"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Lock } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import React, { useMemo } from "react"
@@ -32,7 +32,7 @@ export default function MaterialNav({
         return (
             <Card className="sticky">
                 <CardHeader>
-                    <CardTitle>Daftar Materi</CardTitle>
+                    <CardTitle>Material List</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2">
                     {Array(4)
@@ -56,12 +56,19 @@ export default function MaterialNav({
                 <Card className="p-0">
                     <AccordionTrigger className="pr-6">
                         <CardHeader className="w-fit max-sm:py-2">
-                            <CardTitle>Daftar Materi</CardTitle>
+                            <CardTitle className="text-start">
+                                Material List
+                            </CardTitle>
                         </CardHeader>
                     </AccordionTrigger>
                     <AccordionContent>
                         <CardContent className="flex flex-col gap-2">
-                            <div className="flex flex-col mb-4">
+                            <div
+                                className={cn(
+                                    "flex flex-col mb-4",
+                                    !data?.register_status && "opacity-50",
+                                )}
+                            >
                                 <div className="flex justify-between items-center">
                                     <p>Progress</p>
                                     <p>
@@ -95,21 +102,29 @@ export default function MaterialNav({
                                                         isActiveMaterial
                                                             ? "underline"
                                                             : "",
+                                                        !data.register_status &&
+                                                            "hover:no-underline cursor-default opacity-70",
                                                     )}
+                                                    rightIcon={
+                                                        !data.register_status && (
+                                                            <Lock
+                                                                size={16}
+                                                                className="text-yellow-600 block ml-auto"
+                                                            />
+                                                        )
+                                                    }
                                                 >
                                                     <div className="flex items-center gap-1">
-                                                        {material
-                                                            .academy_material_progresses
-                                                            ?.status ===
+                                                        <span className="text-start">
+                                                            {material.title}
+                                                        </span>
+                                                        {material?.status ===
                                                             "FINISHED" && (
                                                             <CheckCircle2
                                                                 size={16}
-                                                                className="text-green-700"
+                                                                className="text-green-700 mx-2 flex-none"
                                                             />
                                                         )}
-                                                        <span>
-                                                            {material.title}
-                                                        </span>
                                                     </div>
                                                 </AccordionTrigger>
                                                 <AccordionContent className="gap-1">

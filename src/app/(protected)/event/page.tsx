@@ -1,3 +1,5 @@
+"use client"
+
 import EventList from "./containers/EventList"
 
 export default function EventListPage() {

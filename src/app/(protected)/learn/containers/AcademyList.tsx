@@ -10,10 +10,11 @@ export default function AcademyList() {
     const {
         data: listAcademy,
         isLoading: loadingListAcademy,
+        isRefetching: refetchingListAcademy,
         isError,
     } = useGetListAcademy()
 
-    if (loadingListAcademy) {
+    if (loadingListAcademy || refetchingListAcademy) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (

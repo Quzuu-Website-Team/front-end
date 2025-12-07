@@ -44,6 +44,13 @@ const postMarkContentAsRead = async (
     return response.data.status === "success"
 }
 
+const postJoinAcademy = async (academyCode: string): Promise<Boolean> => {
+    const response = await api.post<{ status: string }>(`/academy/join`, {
+        code: academyCode,
+    })
+    return response.data.status === "success"
+}
+
 export const useGetListAcademy = () => {
     return useQuery<AcademyListResponse, Error, Academy[]>({
         queryKey: [ACADEMY_QUERY_KEY, "list"],
@@ -64,6 +71,7 @@ export const useGetAcademyMaterialContent = (
     academySlug: string,
     materialSlug: string,
     order: number,
+    enableQuery: boolean = false,
 ) => {
     return useQuery<
         AcademyMaterialContentResponse,
@@ -78,13 +86,10 @@ export const useGetAcademyMaterialContent = (
             order,
         ],
         queryFn: () => {
-            if (!materialSlug) {
-                return new Promise(() => {}) // never resolve the promise
-            }
             return getAcademyMaterialContent(academySlug, materialSlug, order)
         },
         select: (response) => response.data,
-        enabled: !!materialSlug, // only run if materialSlug is provided
+        enabled: enableQuery, // only run if enabled
     })
 }
 
@@ -107,6 +112,19 @@ export const usePostMarkContentAsRead = (
         onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: [ACADEMY_QUERY_KEY, "detail"],
+            })
+        },
+    })
+}
+
+export const usePostJoinAcademy = () => {
+    const queryClient = useQueryClient()
+    return useMutation<Boolean, Error, string>({
+        mutationKey: [ACADEMY_QUERY_KEY, "join"],
+        mutationFn: (academyCode: string) => postJoinAcademy(academyCode),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [ACADEMY_QUERY_KEY],
             })
         },
     })
