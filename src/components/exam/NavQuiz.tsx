@@ -107,6 +107,7 @@ const NavQuiz: React.FC<NavQuizProps> = ({
     }, [userAnswers, questions])
 
     // Convert remaining time from minutes to seconds
+    // Only calculate if showRemainingTime is true
     const remainingTimeInSeconds = useMemo(() => {
         if (!showRemainingTime) return undefined
         return remainingTime ? remainingTime * 60 : undefined
@@ -121,13 +122,16 @@ const NavQuiz: React.FC<NavQuizProps> = ({
 
     const [isTimeout, setIsTimeout] = useState(false)
 
+    // Only handle timeout if showRemainingTime is true (timer is enabled)
     const handleTimeout = useCallback(() => {
+        if (!showRemainingTime) return // Skip timeout logic if timer is disabled
+
         setIsTimeout(true)
         if (!isReviewMode) {
             onSubmitAnswers()
             setDialogSubmit(true)
         }
-    }, [isReviewMode, onSubmitAnswers])
+    }, [isReviewMode, onSubmitAnswers, showRemainingTime])
 
     return (
         <div className="bg-white pt-4 pb-6 px-6 rounded-3xl text-slate-800 shadow flex flex-col gap-6">
@@ -182,7 +186,7 @@ const NavQuiz: React.FC<NavQuizProps> = ({
                             className="w-full text-primary border-primary hover:bg-primary-50"
                             iconLeft={<ArrowLeft size={16} />}
                         >
-                            Back to Event
+                            Back
                         </Button>
                     </Link>
                 ) : (

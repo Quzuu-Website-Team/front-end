@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Check, AlertCircle } from "lucide-react"
 import { Attempt, Question, CodeMetadata } from "@/types/attempt"
 import LoadingQuiz from "./LoadingQuiz"
+import ExamNotFound from "./ExamNotFound"
 
 type UserAnswers = Record<string, string[]>
 type SavingStatus = "idle" | "saving" | "success" | "error"
@@ -42,6 +43,9 @@ interface QuizContainerProps {
 
     // Navigation
     basePath: string
+
+    // Timer control
+    showRemainingTime?: boolean
 }
 
 const QuizContainer: React.FC<QuizContainerProps> = ({
@@ -55,6 +59,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
     onUpdateAnswer,
     onSubmitAnswers,
     basePath,
+    showRemainingTime = true, // Default to true for backward compatibility
 }) => {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -155,7 +160,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
     if (isLoading) return <LoadingQuiz />
 
     if (!currentQuestion) {
-        return <div>Tidak ada soal untuk nomor {currentNumber}</div>
+        return <ExamNotFound />
     }
 
     return (
@@ -169,7 +174,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
                 userAnswers={userAnswers}
                 questions={attempt?.questions || []}
                 remainingTime={attempt?.remaining_time}
-                showRemainingTime={!attempt?.submitted}
+                showRemainingTime={showRemainingTime && !attempt?.submitted}
             />
 
             <div className="display-quiz col-span-2 bg-white p-9 rounded-3xl text-slate-800 shadow flex flex-col gap-4">
