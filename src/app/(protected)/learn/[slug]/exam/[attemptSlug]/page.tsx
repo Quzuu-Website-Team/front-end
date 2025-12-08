@@ -21,13 +21,14 @@ type QuestionSavingState = Record<
 type FileUploadingState = Record<string, boolean>
 
 interface QuizContainerWrapperProps {
-    attemptSlug: string
-    slug: string
+    params: {
+        attemptSlug: string
+        slug: string
+    }
 }
 
 const AcademyExam: React.FC<QuizContainerWrapperProps> = ({
-    slug,
-    attemptSlug,
+    params: { attemptSlug, slug },
 }) => {
     const pathName = usePathname()
 
