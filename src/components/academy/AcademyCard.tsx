@@ -46,9 +46,14 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
                 />
             </div>
 
-            <div className="flex flex-col gap-4 p-4 text-gray-600">
+            <div className="flex flex-col gap-4 p-4 text-gray-600 flex-1">
                 <div>
-                    <h3 className="text-lg font-semibold tracking-tight text-foreground">
+                    {!!academy.register_status && (
+                        <Badge variant="success" className="w-fit mb-1">
+                            Enrolled
+                        </Badge>
+                    )}
+                    <h3 className="text-lg font-semibold tracking-tight text-foreground line-clamp-2">
                         {title}
                     </h3>
                     <p className="text-muted-foreground text-base line-clamp-1">
@@ -56,7 +61,7 @@ export default function AcademyCard({ academy }: AcademyCardProps) {
                     </p>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col mt-auto">
                     <div className="flex justify-between items-center">
                         <p>Progress</p>
                         <p>{academy_progress?.progress || 0}%</p>

@@ -3,6 +3,7 @@
 import { EventCard } from "@/components/events/EventCard"
 import { EventCardSkeleton } from "@/components/events/EventCardSkeleton"
 import { useGetListEvent } from "@/lib/queries/events"
+import EmptyEventList from "./EmptyEventList"
 
 export default function EventList() {
     const {
@@ -23,6 +24,10 @@ export default function EventList() {
 
     if (isError) {
         return <div>Terjadi kesalahan saat memuat data.</div>
+    }
+
+    if (!listEvent?.length) {
+        return <EmptyEventList />
     }
 
     return (

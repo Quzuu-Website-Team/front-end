@@ -14,6 +14,7 @@ import {
     AlertCircle,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { useQueryClient } from "@tanstack/react-query"
 
 const UserDropdown: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -37,9 +38,13 @@ const UserDropdown: React.FC = () => {
         }
     }, [])
 
+    const queryClient = useQueryClient()
     const handleLogout = async () => {
         setIsOpen(false) // Close dropdown immediately
+
         await logout()
+        // Clear query cache
+        queryClient.removeQueries()
     }
 
     // Show loading state only if actually loading and no user data

@@ -32,6 +32,7 @@ export interface Academy {
     title: string
     description: string
     slug: string
+    code: string
     materials_count: number
     register_status: boolean
     image_url?: string
@@ -45,6 +46,7 @@ export interface AcademyMaterial {
     slug: string
     order: number
     contents_count: number
+    status: AcademyStatus // For list materials
     academy_material_progresses?: AcademyMaterialProgress
     contents?: AcademyMaterialContent[]
 }

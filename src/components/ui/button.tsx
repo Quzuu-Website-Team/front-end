@@ -81,20 +81,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 {...props}
             >
                 {iconLeft && (
-                    <span className="mr-2 inline-flex items-center">
-                        {iconLeft}
-                    </span>
+                    <span className="inline-flex items-center">{iconLeft}</span>
                 )}
                 {children}
                 {iconRight && !isLoading && (
-                    <span className="ml-2 inline-flex items-center">
+                    <span className="inline-flex items-center">
                         {iconRight}
                     </span>
                 )}
 
-                {isLoading && (
-                    <LoaderCircle className="ml-2 h-4 w-4 animate-spin" />
-                )}
+                {isLoading && <LoaderCircle className="h-4 w-4 animate-spin" />}
             </Comp>
         )
     },

@@ -52,20 +52,6 @@ api.interceptors.request.use(
     (error) => Promise.reject(error),
 )
 
-// Response interceptor to handle common response patterns
-api.interceptors.response.use(
-    (response) => response,
-    (error: AxiosError) => {
-        if (error.response?.status === 401) {
-            removeAuthToken()
-            if (typeof window !== "undefined") {
-                window.location.href = "/login"
-            }
-        }
-        return Promise.reject(error)
-    },
-)
-
 // Helper to handle API responses
 const handleApiResponse = <T>(response: AxiosResponse<any>): T => {
     if (

@@ -7,6 +7,13 @@ import {
 } from "@/types/academy"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "../api"
+import {
+    AnswerAttemptPayload,
+    AnswerQuestionResponse,
+    Attempt,
+    AttemptDetailResponse,
+    SubmitAttemptResponse,
+} from "@/types/attempt"
 
 export const ACADEMY_QUERY_KEY = "academy"
 
@@ -44,6 +51,62 @@ const postMarkContentAsRead = async (
     return response.data.status === "success"
 }
 
+const postJoinAcademy = async (academyCode: string): Promise<Boolean> => {
+    const response = await api.post<{ status: string }>(`/academy/join`, {
+        code: academyCode,
+    })
+    return response.data.status === "success"
+}
+
+// EXAM
+const getAttemptAcademyExam = async (
+    academySlug: string,
+    examSlug: string,
+): Promise<AttemptDetailResponse> => {
+    const response = await api.get<AttemptDetailResponse>(
+        `/academys/${academySlug}/exam/${examSlug}/attempt`,
+    )
+    return response.data
+}
+
+const postAnswerAcademyExam = async (
+    academySlug: string,
+    attemptId: string,
+    payload: AnswerAttemptPayload,
+): Promise<AnswerQuestionResponse> => {
+    const response = await api.post<AnswerQuestionResponse>(
+        `/academys/${academySlug}/exam/${attemptId}/answer_question`,
+        payload,
+    )
+    return response.data
+}
+
+const postAnswerAcademyExamFile = async (
+    academySlug: string,
+    attemptId: string,
+    payload: AnswerAttemptPayload,
+): Promise<AnswerQuestionResponse> => {
+    const formData = new FormData()
+    formData.append("file", payload.answer[0])
+    formData.append("question_id", payload.question_id)
+    const response = await api.post<AnswerQuestionResponse>(
+        `/academys/${academySlug}/exam/${attemptId}/answer_question`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } },
+    )
+    return response.data
+}
+
+const postSubmitAcademyExam = async (
+    academySlug: string,
+    attemptId: string,
+): Promise<SubmitAttemptResponse> => {
+    const response = await api.post<SubmitAttemptResponse>(
+        `/academys/${academySlug}/exam/${attemptId}/submit`,
+    )
+    return response.data
+}
+
 export const useGetListAcademy = () => {
     return useQuery<AcademyListResponse, Error, Academy[]>({
         queryKey: [ACADEMY_QUERY_KEY, "list"],
@@ -64,6 +127,7 @@ export const useGetAcademyMaterialContent = (
     academySlug: string,
     materialSlug: string,
     order: number,
+    enableQuery: boolean = false,
 ) => {
     return useQuery<
         AcademyMaterialContentResponse,
@@ -78,13 +142,10 @@ export const useGetAcademyMaterialContent = (
             order,
         ],
         queryFn: () => {
-            if (!materialSlug) {
-                return new Promise(() => {}) // never resolve the promise
-            }
             return getAcademyMaterialContent(academySlug, materialSlug, order)
         },
         select: (response) => response.data,
-        enabled: !!materialSlug, // only run if materialSlug is provided
+        enabled: enableQuery, // only run if enabled
     })
 }
 
@@ -109,5 +170,66 @@ export const usePostMarkContentAsRead = (
                 queryKey: [ACADEMY_QUERY_KEY, "detail"],
             })
         },
+    })
+}
+
+export const usePostJoinAcademy = () => {
+    const queryClient = useQueryClient()
+    return useMutation<Boolean, Error, string>({
+        mutationKey: [ACADEMY_QUERY_KEY, "join"],
+        mutationFn: (academyCode: string) => postJoinAcademy(academyCode),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [ACADEMY_QUERY_KEY],
+            })
+        },
+    })
+}
+
+export const useGetAttemptAcademyExam = (
+    academySlug: string,
+    examSlug: string,
+) => {
+    return useQuery<AttemptDetailResponse, Error, Attempt>({
+        queryKey: [ACADEMY_QUERY_KEY, "get_attempt", academySlug, examSlug],
+        queryFn: () => getAttemptAcademyExam(academySlug, examSlug),
+        select: (response) => response.data,
+    })
+}
+
+export const usePostAnswerAcademyExam = (
+    academySlug: string,
+    attemptId: string,
+) => {
+    return useMutation<AnswerQuestionResponse, Error, AnswerAttemptPayload>({
+        mutationKey: [ACADEMY_QUERY_KEY, "post_answer", academySlug, attemptId],
+        mutationFn: (payload: AnswerAttemptPayload) =>
+            postAnswerAcademyExam(academySlug, attemptId, payload),
+    })
+}
+
+export const usePostAnswerAcademyExamFile = (
+    academySlug: string,
+    attemptId: string,
+) => {
+    return useMutation<AnswerQuestionResponse, Error, AnswerAttemptPayload>({
+        mutationKey: [
+            ACADEMY_QUERY_KEY,
+            "post_answer_file",
+            academySlug,
+            attemptId,
+        ],
+        mutationFn: (payload: AnswerAttemptPayload) =>
+            postAnswerAcademyExamFile(academySlug, attemptId, payload),
+    })
+}
+
+export const usePostSubmitAcademyExam = (
+    academySlug: string,
+    attemptId: string,
+) => {
+    return useMutation<SubmitAttemptResponse, Error>({
+        mutationKey: [ACADEMY_QUERY_KEY, "post_submit", academySlug, attemptId],
+        mutationFn: () => postSubmitAcademyExam(academySlug, attemptId),
     })
 }

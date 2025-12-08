@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect } from "react"
+import { useMemo } from "react"
 import MaterialContent from "./containers/MaterialContent"
 import MaterialHeader from "./containers/MaterialHeader"
 import MaterialNav from "./containers/MaterialNav"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import {
     useGetAcademyMaterialContent,
     useGetAcademyMaterials,
@@ -18,13 +18,22 @@ export default function AcademyMaterial({
     params: { slug: string }
 }>) {
     const queryParams = useSearchParams()
-    const pathname = usePathname()
-    const router = useRouter()
     const {
         data: academyDetail,
         isLoading: isLoadingAcademy,
+        isRefetching: isRefetchingAcademy,
         isError: isErrorAcademy,
     } = useGetAcademyMaterials(params.slug)
+
+    const enableMaterialContentQuery = useMemo(
+        () =>
+            !!(
+                academyDetail &&
+                queryParams.get("material") &&
+                queryParams.get("content")
+            ),
+        [academyDetail, queryParams],
+    )
 
     const {
         data: materialContent,
@@ -34,6 +43,7 @@ export default function AcademyMaterial({
         params.slug,
         queryParams.get("material") || "",
         Number(queryParams.get("content") || "1"),
+        enableMaterialContentQuery,
     )
 
     const markAsReadMutation = usePostMarkContentAsRead(
@@ -42,36 +52,29 @@ export default function AcademyMaterial({
         Number(queryParams.get("content") || "1"),
     )
 
-    useEffect(() => {
-        if (
-            (!queryParams.get("material") || !queryParams.get("content")) &&
-            academyDetail &&
-            !isLoadingAcademy &&
-            academyDetail.materials?.length &&
-            academyDetail.register_status
-        ) {
-            router.push(
-                `${pathname}?material=${academyDetail.materials[0].slug}&content=1`,
-            )
-        }
-    }, [pathname, academyDetail, isLoadingAcademy, queryParams, router])
-
     if (isErrorAcademy) {
         return <AcademyMaterialError />
     }
 
     return (
         <div className="container py-11 flex flex-col gap-8">
-            <MaterialHeader data={academyDetail} isLoading={isLoadingAcademy} />
+            <MaterialHeader
+                data={academyDetail}
+                isLoading={isLoadingAcademy || isRefetchingAcademy}
+            />
             <div className="flex gap-6 flex-col md:grid md:grid-cols-3">
                 <MaterialNav
                     data={academyDetail}
-                    isLoading={isLoadingAcademy}
+                    isLoading={isLoadingAcademy || isRefetchingAcademy}
                 />
                 <MaterialContent
                     academyDetail={academyDetail}
                     academyMaterialContent={materialContent}
-                    isLoading={isLoadingAcademy || isLoadingMaterialContent}
+                    isLoading={
+                        isLoadingAcademy ||
+                        isRefetchingAcademy ||
+                        isLoadingMaterialContent
+                    }
                     isError={isErrorMaterialContent}
                     markAsReadMutation={markAsReadMutation}
                 />
