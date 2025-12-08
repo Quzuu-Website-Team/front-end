@@ -27,9 +27,6 @@ const FormSchema = z
         email: z
             .string()
             .email({ message: "Please enter a valid email address." }),
-        name: z
-            .string()
-            .min(3, { message: "Name must be at least 3 characters." }),
         username: z
             .string()
             .min(3, { message: "Username must be at least 3 characters." })
@@ -62,7 +59,6 @@ export default function Register() {
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
-            name: "",
             email: "",
             username: "",
             password: "",
@@ -80,12 +76,7 @@ export default function Register() {
                 username: data.username,
             })
 
-            await registerUser(
-                data.name,
-                data.email,
-                data.username,
-                data.password,
-            )
+            await registerUser(data.email, data.username, data.password)
 
             toast({
                 title: "Registration Successful",
@@ -154,26 +145,6 @@ export default function Register() {
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="w-2/3 space-y-6"
                     >
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Your full name"
-                                            type="text"
-                                            autoComplete="name"
-                                            disabled={loading}
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
                         <FormField
                             control={form.control}
                             name="email"
