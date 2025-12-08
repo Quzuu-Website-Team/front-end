@@ -7,7 +7,7 @@ import { LockIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 const fallbackImage = "/assets/img/event-placeholder.svg"
 
@@ -20,6 +20,12 @@ const NavEvent = ({ slug }: { slug: string }) => {
     const [imageSrc, setImageSrc] = useState(
         eventDetail?.img_banner || fallbackImage,
     )
+
+    useEffect(() => {
+        if (eventDetail?.img_banner) {
+            setImageSrc(eventDetail.img_banner)
+        }
+    }, [eventDetail?.img_banner])
 
     const menuItems = useMemo(
         () => [
@@ -84,6 +90,7 @@ const NavEvent = ({ slug }: { slug: string }) => {
                     className="object-cover w-full aspect-video rounded-lg"
                     width={320}
                     height={180}
+                    unoptimized
                 />
             </CardHeader>
             <CardContent className="menu-links w-full space-y-1">
