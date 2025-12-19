@@ -64,7 +64,7 @@ const getAttemptAcademyExam = async (
     examSlug: string,
 ): Promise<AttemptDetailResponse> => {
     const response = await api.get<AttemptDetailResponse>(
-        `/academys/${academySlug}/exam/${examSlug}/attempt`,
+        `/academy/${academySlug}/exam/${examSlug}/attempt`,
     )
     return response.data
 }
@@ -75,7 +75,7 @@ const postAnswerAcademyExam = async (
     payload: AnswerAttemptPayload,
 ): Promise<AnswerQuestionResponse> => {
     const response = await api.post<AnswerQuestionResponse>(
-        `/academys/${academySlug}/exam/${attemptId}/answer_question`,
+        `/academy/${academySlug}/exam/${attemptId}/answer_question`,
         payload,
     )
     return response.data
@@ -90,7 +90,7 @@ const postAnswerAcademyExamFile = async (
     formData.append("file", payload.answer[0])
     formData.append("question_id", payload.question_id)
     const response = await api.post<AnswerQuestionResponse>(
-        `/academys/${academySlug}/exam/${attemptId}/answer_question`,
+        `/academy/${academySlug}/exam/${attemptId}/answer_question`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } },
     )
@@ -102,7 +102,7 @@ const postSubmitAcademyExam = async (
     attemptId: string,
 ): Promise<SubmitAttemptResponse> => {
     const response = await api.post<SubmitAttemptResponse>(
-        `/academys/${academySlug}/exam/${attemptId}/submit`,
+        `/academy/${academySlug}/exam/${attemptId}/submit`,
     )
     return response.data
 }
