@@ -109,7 +109,7 @@ const Login = () => {
 
     return (
         <div className="login-page w-screen min-h-screen bg-white grid grid-cols-1 md:grid-cols-2 gap-x-6">
-            <section className="input-login p-4 flex flex-col items-center justify-center">
+            <section className="input-login p-8 flex flex-col items-center justify-center">
                 <div className="logo-wrapper w-36">
                     <Image
                         src="/assets/img/quzzulogo.png"
@@ -122,17 +122,17 @@ const Login = () => {
                 <h1 className="text-2xl font-semibold mb-2">
                     Welcome back to Quzuu
                 </h1>
-                <p className="text-slate-500 mb-8">
+                <p className="text-slate-500 mb-8 text-center">
                     Enter your email/username and password to continue.
                 </p>
 
                 {/* Google Sign-In Button */}
-                <div className="w-2/3 mb-6">
+                <div className="sm:w-2/3 w-full mb-6">
                     <GoogleSignInButton disabled={loading} />
                 </div>
 
                 {/* Divider */}
-                <div className="w-2/3 flex items-center mb-6">
+                <div className="sm:w-2/3 w-full flex items-center mb-6">
                     <div className="flex-1 border-t border-gray-300"></div>
                     <span className="px-4 text-gray-500 text-sm">or</span>
                     <div className="flex-1 border-t border-gray-300"></div>
@@ -142,7 +142,7 @@ const Login = () => {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="w-2/3 space-y-6"
+                        className="sm:w-2/3 w-full space-y-6"
                     >
                         <FormField
                             control={form.control}
@@ -155,6 +155,13 @@ const Login = () => {
                                             placeholder="Input your email or username"
                                             type="text"
                                             {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e)
+
+                                                // Clear error message on input change
+                                                if (errorMessage)
+                                                    setErrorMessage("")
+                                            }}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -172,6 +179,13 @@ const Login = () => {
                                             placeholder="Input your password"
                                             type="password"
                                             {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e)
+
+                                                // Clear error message on input change
+                                                if (errorMessage)
+                                                    setErrorMessage("")
+                                            }}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -185,8 +199,9 @@ const Login = () => {
                                 </FormItem>
                             )}
                         />
+                        {/* Error Message Display */}
                         {errorMessage && (
-                            <div className="text-red-500 text-sm">
+                            <div className="text-red-500 text-sm text-center p-3 bg-red-50 rounded-md border border-red-200">
                                 {errorMessage}
                             </div>
                         )}

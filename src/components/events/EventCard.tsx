@@ -48,6 +48,11 @@ export function EventCard({ event }: EventCardProps) {
             </div>
 
             <div className="p-4">
+                {!!event.register_status && (
+                    <Badge variant="success" className="w-fit mb-1">
+                        Enrolled
+                    </Badge>
+                )}
                 <h3 className="text-lg font-semibold tracking-tight">
                     {title}
                 </h3>

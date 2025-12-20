@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -30,20 +30,39 @@ import {
     CardTitle,
 } from "../ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useDebounce } from "use-debounce"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     loading?: boolean
     error?: string | null
+    totalPages?: number
+    page?: number
+    search?: string
+    setPage?: (page: number) => void
+    setSearch?: (search: string) => void
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
     loading = true,
-    error,
+    page = 1,
+    totalPages = 1,
+    search = "",
+    setPage = () => {},
+    setSearch = () => {},
 }: DataTableProps<TData, TValue>) {
+    const [localSearchValue, setLocalSearchValue] = useState(search)
+    const [debouncedSearchValue] = useDebounce(localSearchValue, 500)
+
+    useEffect(() => {
+        if (debouncedSearchValue !== search) {
+            setSearch(debouncedSearchValue)
+        }
+    }, [debouncedSearchValue, setSearch, search])
+
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const table = useReactTable({
         data,
@@ -127,15 +146,9 @@ export function DataTable<TData, TValue>({
                     <div className="flex items-center justify-end basis-2/3">
                         <Input
                             placeholder="Search events..."
-                            value={
-                                (table
-                                    .getColumn("title")
-                                    ?.getFilterValue() as string) ?? ""
-                            }
+                            value={localSearchValue}
                             onChange={(event) =>
-                                table
-                                    .getColumn("title")
-                                    ?.setFilterValue(event.target.value)
+                                setLocalSearchValue(event.target.value)
                             }
                             className="max-w-sm ring-primary"
                         />
@@ -203,8 +216,8 @@ export function DataTable<TData, TValue>({
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
                     iconLeft={<ChevronLeft size={16} />}
                 >
                     Previous
@@ -212,8 +225,8 @@ export function DataTable<TData, TValue>({
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
                     iconRight={<ChevronRight size={16} />}
                 >
                     Next

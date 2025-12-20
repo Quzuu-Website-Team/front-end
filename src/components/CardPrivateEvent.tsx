@@ -12,16 +12,11 @@ import {
     CardHeader,
     CardTitle,
 } from "./ui/card"
+import { useRegisterEvent } from "@/lib/queries/events"
 
-interface CardPrivateEventProps {
-    onEnrollSuccess: () => void
-}
-
-const CardPrivateEvent: React.FC<CardPrivateEventProps> = ({
-    onEnrollSuccess,
-}) => {
+const CardPrivateEvent: React.FC = () => {
     const [eventCode, setEventCode] = useState("")
-    const [loading, setLoading] = useState(false)
+    const { isPending: loading, mutate: postRegisterEvent } = useRegisterEvent()
 
     const handleEnroll = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -35,41 +30,26 @@ const CardPrivateEvent: React.FC<CardPrivateEventProps> = ({
             return
         }
 
-        setLoading(true)
+        postRegisterEvent(eventCode, {
+            onSuccess: () => {
+                toast({
+                    title: "Successfully enrolled!",
+                    description: "You have successfully enrolled in the event",
+                })
 
-        try {
-            interface EventRegistrationResponse {
-                message?: string
-                // Add other properties you expect in the response
-                success?: boolean
-                data?: any
-            }
-
-            const response = (await registerEvent(
-                eventCode,
-            )) as EventRegistrationResponse
-
-            onEnrollSuccess()
-            toast({
-                title: "Successfully enrolled!",
-                description:
-                    response.message ||
-                    "You have successfully enrolled in the event",
-            })
-
-            // Clear the input fields after successful enrollment
-            setEventCode("")
-        } catch (error: any) {
-            toast({
-                variant: "destructive",
-                title: "Error enrolling in event",
-                description:
-                    error.message ||
-                    "An error occurred while enrolling in the event",
-            })
-        } finally {
-            setLoading(false)
-        }
+                // Clear the input fields after successful enrollment
+                setEventCode("")
+            },
+            onError: (error: any) => {
+                toast({
+                    variant: "destructive",
+                    title: "Error enrolling in event",
+                    description:
+                        error.message ||
+                        "An error occurred while enrolling in the event",
+                })
+            },
+        })
     }
 
     return (

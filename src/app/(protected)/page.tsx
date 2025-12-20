@@ -1,44 +1,28 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { getEventList } from "@/lib/api"
-import { Events, columns } from "@/components/table-events/columns"
+import React, { useMemo, useState } from "react"
+import { columns } from "@/components/table-events/columns"
 import { DataTable } from "@/components/table-events/DataTable"
 import CardPrivateEvent from "@/components/CardPrivateEvent"
-import { toast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/AuthContext"
+import { useGetListEvent } from "@/lib/queries/events"
 
 export default function Home() {
-    const [data, setData] = useState<Events[]>([])
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState<boolean>(true)
     const { user, isLoading: loadingUser } = useAuth()
+    const [page, setPage] = useState<number>(1)
+    const [search, setSearch] = useState<string>("")
 
-    const fetchEvents = async () => {
-        try {
-            setLoading(true)
-            const eventData = await getEventList()
-            console.log("eventData", eventData)
-            setData(eventData)
-        } catch (err: any) {
-            console.error("Error fetching events:", err)
-            setError(err.message || "Failed to fetch events.")
+    const {
+        data,
+        isLoading: loadingListEvent,
+        isRefetching: refetchingListEvent,
+        isError,
+    } = useGetListEvent({
+        page,
+        search,
+    })
 
-            toast({
-                variant: "destructive",
-                title: "Error fetching events",
-                description:
-                    err.message ||
-                    "Failed to fetch events. Please try again later.",
-            })
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        fetchEvents()
-    }, [])
+    const listEvent = useMemo(() => data?.data || [], [data])
 
     return (
         <main className="home-page container text-foreground">
@@ -58,13 +42,17 @@ export default function Home() {
             <section className="pb-10 grid grid-cols-1 md:grid-cols-3 gap-y-8 md:gap-x-8">
                 <DataTable
                     columns={columns}
-                    data={data}
-                    loading={loading}
-                    error={error}
+                    data={listEvent}
+                    loading={loadingListEvent || refetchingListEvent}
+                    page={page}
+                    totalPages={data?.totalPages}
+                    setPage={setPage}
+                    search={search}
+                    setSearch={setSearch}
                 />
 
-                <aside>
-                    <CardPrivateEvent onEnrollSuccess={() => fetchEvents()} />
+                <aside className="max-md:order-first">
+                    <CardPrivateEvent />
                 </aside>
             </section>
         </main>

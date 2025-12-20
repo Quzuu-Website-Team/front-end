@@ -2,6 +2,7 @@ import {
     Academy,
     AcademyDetailResponse,
     AcademyListResponse,
+    AcademyListResult,
     AcademyMaterialContent,
     AcademyMaterialContentResponse,
 } from "@/types/academy"
@@ -17,8 +18,28 @@ import {
 
 export const ACADEMY_QUERY_KEY = "academy"
 
-const getListAcademy = async (): Promise<AcademyListResponse> => {
-    const response = await api.get<AcademyListResponse>("/academy")
+interface ListAcademyParams {
+    page?: number
+    search?: string
+    sortBy?: string
+    order?: "asc" | "desc"
+    registerStatus?: string
+}
+
+const getListAcademy = async ({
+    page = 1,
+    search,
+    sortBy,
+    order,
+    registerStatus,
+}: ListAcademyParams = {}): Promise<AcademyListResponse> => {
+    const params: any = { page }
+    if (search) params.search = search
+    if (sortBy) params.sortBy = sortBy
+    if (order) params.order = order
+    if (registerStatus) params.registerStatus = registerStatus
+
+    const response = await api.get<AcademyListResponse>("/academy", { params })
     return response.data
 }
 
@@ -64,7 +85,7 @@ const getAttemptAcademyExam = async (
     examSlug: string,
 ): Promise<AttemptDetailResponse> => {
     const response = await api.get<AttemptDetailResponse>(
-        `/academys/${academySlug}/exam/${examSlug}/attempt`,
+        `/academy/${academySlug}/exam/${examSlug}/attempt`,
     )
     return response.data
 }
@@ -75,7 +96,7 @@ const postAnswerAcademyExam = async (
     payload: AnswerAttemptPayload,
 ): Promise<AnswerQuestionResponse> => {
     const response = await api.post<AnswerQuestionResponse>(
-        `/academys/${academySlug}/exam/${attemptId}/answer_question`,
+        `/academy/${academySlug}/exam/${attemptId}/answer_question`,
         payload,
     )
     return response.data
@@ -90,7 +111,7 @@ const postAnswerAcademyExamFile = async (
     formData.append("file", payload.answer[0])
     formData.append("question_id", payload.question_id)
     const response = await api.post<AnswerQuestionResponse>(
-        `/academys/${academySlug}/exam/${attemptId}/answer_question`,
+        `/academy/${academySlug}/exam/${attemptId}/answer_question`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } },
     )
@@ -102,16 +123,21 @@ const postSubmitAcademyExam = async (
     attemptId: string,
 ): Promise<SubmitAttemptResponse> => {
     const response = await api.post<SubmitAttemptResponse>(
-        `/academys/${academySlug}/exam/${attemptId}/submit`,
+        `/academy/${academySlug}/exam/${attemptId}/submit`,
     )
     return response.data
 }
 
-export const useGetListAcademy = () => {
-    return useQuery<AcademyListResponse, Error, Academy[]>({
-        queryKey: [ACADEMY_QUERY_KEY, "list"],
-        queryFn: getListAcademy,
-        select: (response) => response.data,
+export const useGetListAcademy = (params: ListAcademyParams = {}) => {
+    return useQuery<AcademyListResponse, Error, AcademyListResult>({
+        queryKey: [ACADEMY_QUERY_KEY, "list", ...Object.values(params)],
+        queryFn: () => getListAcademy(params),
+        select: (response) => ({
+            data: response.data,
+            currentPage: response.meta_data.currentPage,
+            totalItems: response.meta_data.totalItems,
+            totalPages: response.meta_data.totalPages,
+        }),
     })
 }
 

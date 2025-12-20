@@ -1,4 +1,5 @@
 import Navbar from "@/components/navbar/Navbar"
+import { Suspense } from "react"
 
 export default function RootLayout({
     children,
@@ -8,7 +9,9 @@ export default function RootLayout({
     return (
         <main className="min-h-screen h-full">
             <Navbar />
-            <div className="pt-20">{children}</div>
+            <Suspense>
+                <div className="pt-20">{children}</div>
+            </Suspense>
         </main>
     )
 }

@@ -1,10 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import type {
     EventListResponse,
     EventData,
     EventDetailResponse,
     RegisterEventResponse,
+    EventListResult,
 } from "@/types/events"
 import {
     AnswerAttemptPayload,
@@ -19,8 +20,28 @@ import {
 // query key
 export const EVENTS_QUERY_KEY = "events"
 
-const getListEvent = async (): Promise<EventListResponse> => {
-    const response = await api.get<EventListResponse>("/events")
+interface ListEventParams {
+    page?: number
+    search?: string
+    sortBy?: string
+    order?: "asc" | "desc"
+    registerStatus?: string
+}
+
+const getListEvent = async ({
+    page = 1,
+    search,
+    sortBy,
+    order,
+    registerStatus,
+}: ListEventParams = {}): Promise<EventListResponse> => {
+    const params: any = { page }
+    if (search) params.search = search
+    if (sortBy) params.sortBy = sortBy
+    if (order) params.order = order
+    if (registerStatus) params.registerStatus = registerStatus
+
+    const response = await api.get<EventListResponse>("/events", { params })
     return response.data
 }
 
@@ -94,11 +115,16 @@ const postSubmitEventExam = async (
     return response.data
 }
 
-export const useGetListEvent = () => {
-    return useQuery<EventListResponse, Error, EventData[]>({
-        queryKey: [EVENTS_QUERY_KEY, "list"],
-        queryFn: getListEvent,
-        select: (response) => response.data,
+export const useGetListEvent = (params: ListEventParams = {}) => {
+    return useQuery<EventListResponse, Error, EventListResult>({
+        queryKey: [EVENTS_QUERY_KEY, "list", ...Object.values(params)],
+        queryFn: () => getListEvent(params),
+        select: (response) => ({
+            data: response.data,
+            currentPage: response.meta_data.currentPage,
+            totalItems: response.meta_data.totalItems,
+            totalPages: response.meta_data.totalPages,
+        }),
     })
 }
 
@@ -114,10 +140,16 @@ export const useGetDetailEvent = (slug: string) => {
     })
 }
 
-export const useRegisterEvent = (eventCode: string) => {
-    return useMutation<RegisterEventResponse, Error>({
-        mutationKey: [EVENTS_QUERY_KEY, "register", eventCode],
-        mutationFn: () => registerEvent(eventCode),
+export const useRegisterEvent = () => {
+    const queryClient = useQueryClient()
+    return useMutation<RegisterEventResponse, Error, string>({
+        mutationKey: [EVENTS_QUERY_KEY, "register"],
+        mutationFn: (eventCode: string) => registerEvent(eventCode),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [EVENTS_QUERY_KEY],
+            })
+        },
     })
 }
 

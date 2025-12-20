@@ -51,7 +51,7 @@ const EventLayout = ({ children, params }: EventLayoutProps) => {
             </section>
 
             <ToastProvider>
-                <Toast open={isFetching}>
+                <Toast open={isFetching} variant="default">
                     <ToastTitle className="flex items-center gap-2">
                         <LoaderCircle
                             size={20}

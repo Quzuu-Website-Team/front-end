@@ -5,30 +5,24 @@ import { useGetDetailEvent, useRegisterEvent } from "@/lib/queries/events"
 import RegisterEventDialog from "./RegisterEventDialog"
 import { useState } from "react"
 import { toast } from "@/hooks/use-toast"
-import { useQueryClient } from "@tanstack/react-query"
 
 export default function RegisterEvent({ slug }: { slug: string }) {
-    const queryClient = useQueryClient()
     const { data: eventDetail, isLoading: loadingDetailEvent } =
         useGetDetailEvent(slug)
 
     const { isPending: loadingRegisterEvent, mutate: postRegisterEvent } =
-        useRegisterEvent(eventDetail?.event_code || "")
+        useRegisterEvent()
 
     const [openRegisterDialog, setOpenRegisterDialog] = useState(false)
 
     const onRegisterEvent = () => {
-        postRegisterEvent(undefined, {
-            onSuccess: (response) => {
+        postRegisterEvent(eventDetail?.event_code || "", {
+            onSuccess: () => {
                 setOpenRegisterDialog(false)
                 toast({
                     title: "Successfully registered!",
-                    description:
-                        response.message ||
-                        `You have successfully registered for the event "${eventDetail?.title}"`,
-                })
-                queryClient.invalidateQueries({
-                    queryKey: ["events", "detail", slug],
+                    description: `You have successfully registered for the event "${eventDetail?.title}"`,
+                    variant: "success",
                 })
             },
             onError: (error) => {

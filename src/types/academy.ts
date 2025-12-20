@@ -1,4 +1,4 @@
-import { ListData, ResponseData } from "./common"
+import { ListData, ListDataResponse, ResponseData } from "./common"
 
 export type AcademyStatus = "NOT_STARTED" | "IN_PROGRESS" | "FINISHED"
 
@@ -61,7 +61,10 @@ export interface AcademyMaterialContent {
     academy_content_progresses?: AcademyContentProgress
 }
 
-export interface AcademyListResponse extends ListData<Academy> {}
+export interface AcademyListResponse extends ListDataResponse<Academy> {}
 export interface AcademyDetailResponse extends ResponseData<Academy> {}
 export interface AcademyMaterialContentResponse
     extends ResponseData<AcademyMaterialContent> {}
+
+// Query result with pagination
+export interface AcademyListResult extends ListData<Academy> {}

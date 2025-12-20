@@ -105,7 +105,7 @@ export default function Register() {
 
     return (
         <div className="register-page w-full min-h-screen overflow-auto bg-white grid grid-cols-1 md:grid-cols-2 gap-x-6">
-            <section className="input-register p-4 flex flex-col items-center justify-center">
+            <section className="input-register p-8 flex flex-col items-center justify-center">
                 <div className="logo-wrapper w-36 mb-6">
                     <Image
                         src="/assets/img/quzzulogo.png"
@@ -125,7 +125,7 @@ export default function Register() {
                 </p>
 
                 {/* Google Sign-In Button */}
-                <div className="w-2/3 mb-6">
+                <div className="sm:w-2/3 w-full mb-6">
                     <GoogleSignInButton
                         text="Sign up with Google"
                         disabled={loading}
@@ -133,7 +133,7 @@ export default function Register() {
                 </div>
 
                 {/* Divider */}
-                <div className="w-2/3 flex items-center mb-6">
+                <div className="sm:w-2/3 w-full flex items-center mb-6">
                     <div className="flex-1 border-t border-gray-300"></div>
                     <span className="px-4 text-gray-500 text-sm">or</span>
                     <div className="flex-1 border-t border-gray-300"></div>
@@ -143,7 +143,7 @@ export default function Register() {
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="w-2/3 space-y-6"
+                        className="sm:w-2/3 w-full space-y-6"
                     >
                         <FormField
                             control={form.control}
