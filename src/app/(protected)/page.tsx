@@ -51,7 +51,7 @@ export default function Home() {
                     setSearch={setSearch}
                 />
 
-                <aside>
+                <aside className="max-md:order-first">
                     <CardPrivateEvent />
                 </aside>
             </section>
