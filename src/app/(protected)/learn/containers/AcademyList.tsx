@@ -53,7 +53,7 @@ export default function AcademyList() {
         isError,
     } = useGetListAcademy({
         page,
-        search: search,
+        search,
         sortBy,
         order: order as "asc" | "desc",
         registerStatus,

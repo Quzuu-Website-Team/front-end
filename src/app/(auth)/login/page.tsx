@@ -155,6 +155,13 @@ const Login = () => {
                                             placeholder="Input your email or username"
                                             type="text"
                                             {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e)
+
+                                                // Clear error message on input change
+                                                if (errorMessage)
+                                                    setErrorMessage("")
+                                            }}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -172,6 +179,13 @@ const Login = () => {
                                             placeholder="Input your password"
                                             type="password"
                                             {...field}
+                                            onChange={(e) => {
+                                                field.onChange(e)
+
+                                                // Clear error message on input change
+                                                if (errorMessage)
+                                                    setErrorMessage("")
+                                            }}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -185,8 +199,9 @@ const Login = () => {
                                 </FormItem>
                             )}
                         />
+                        {/* Error Message Display */}
                         {errorMessage && (
-                            <div className="text-red-500 text-sm">
+                            <div className="text-red-500 text-sm text-center p-3 bg-red-50 rounded-md border border-red-200">
                                 {errorMessage}
                             </div>
                         )}

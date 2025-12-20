@@ -51,7 +51,7 @@ export default function EventList() {
         isError,
     } = useGetListEvent({
         page,
-        search: search,
+        search,
         sortBy,
         order: order as "asc" | "desc",
         registerStatus,
