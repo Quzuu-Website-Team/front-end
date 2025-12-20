@@ -44,6 +44,7 @@ interface GenericListViewProps {
     // Content
     children: ReactNode
     isLoading?: boolean
+    isInitialLoading?: boolean
     isEmpty?: boolean
     emptyState?: ReactNode
 
@@ -67,6 +68,7 @@ export default function GenericListView({
     showPagination = true,
     children,
     isLoading = false,
+    isInitialLoading = false,
     isEmpty = false,
     emptyState,
     additionalFilters,
@@ -114,7 +116,7 @@ export default function GenericListView({
                 <div className="flex flex-col flex-wrap sm:flex-row gap-4 items-center justify-between">
                     {/* Search Input */}
                     {showSearch &&
-                        (isLoading && isEmpty ? (
+                        (isInitialLoading ? (
                             <div className="relative w-full sm:w-80 animate-pulse">
                                 <div className="h-10 bg-slate-200 rounded-full w-full" />
                             </div>
@@ -149,7 +151,7 @@ export default function GenericListView({
                     {/* Additional Filters (like Tabs) */}
                     {additionalFilters && (
                         <div className="flex justify-center max-md:order-2">
-                            {isLoading && isEmpty ? (
+                            {isInitialLoading ? (
                                 <div className="h-10 w-60 rounded-md bg-slate-200 mb-2 mx-auto"></div>
                             ) : (
                                 additionalFilters
@@ -159,7 +161,7 @@ export default function GenericListView({
                     {/* Sort Dropdown */}
                     {showSort && (
                         <div className="w-full sm:w-auto sm:min-w-[200px]">
-                            {isLoading && isEmpty ? (
+                            {isInitialLoading ? (
                                 <div className="h-10 bg-slate-200 rounded-md w-full" />
                             ) : (
                                 <Select

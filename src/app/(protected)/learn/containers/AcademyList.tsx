@@ -6,7 +6,7 @@ import { useGetListAcademy } from "@/lib/queries/academy"
 import EmptyAcademyList from "./EmptyList"
 import AcademyListError from "./AcademyListError"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import EmptyMyAcademyList from "./EmptyMyAcademyList"
 import GenericListView, { SortOption } from "@/components/list/GenericListView"
 import { useListParams } from "@/hooks/use-list-params"
@@ -59,6 +59,14 @@ export default function AcademyList() {
         registerStatus,
     })
 
+    const [isInitialLoading, setIsInitialLoading] = useState(false)
+
+    useEffect(() => {
+        if (!loadingListAcademy && isInitialLoading) {
+            setIsInitialLoading(false)
+        }
+    }, [loadingListAcademy, isInitialLoading])
+
     const listAcademy = useMemo(() => data?.data || [], [data])
 
     const handleSortChange = (newSortBy: string, newOrder: "asc" | "desc") => {
@@ -94,7 +102,7 @@ export default function AcademyList() {
         >
             <TabsList className="bg-slate-200">
                 <TabsTrigger value="">All Available</TabsTrigger>
-                <TabsTrigger value="True">My Academies</TabsTrigger>
+                <TabsTrigger value="1">My Academies</TabsTrigger>
             </TabsList>
         </Tabs>
     )
@@ -102,7 +110,7 @@ export default function AcademyList() {
     // Determine empty state
     const getEmptyState = () => {
         if (isError) return <AcademyListError />
-        if (!listAcademy?.length && registerStatus === "True")
+        if (!listAcademy?.length && registerStatus === "1")
             return <EmptyMyAcademyList />
         if (!listAcademy?.length) return <EmptyAcademyList />
         return null
@@ -121,6 +129,7 @@ export default function AcademyList() {
             totalPages={data?.totalPages || 1}
             onPageChange={setPage}
             isLoading={loadingListAcademy || refetchingListAcademy}
+            isInitialLoading={isInitialLoading}
             isEmpty={!listAcademy?.length || isError}
             emptyState={getEmptyState()}
             additionalFilters={tabsFilter}

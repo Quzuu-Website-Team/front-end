@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import type {
     EventListResponse,
@@ -140,10 +140,16 @@ export const useGetDetailEvent = (slug: string) => {
     })
 }
 
-export const useRegisterEvent = (eventCode: string) => {
-    return useMutation<RegisterEventResponse, Error>({
-        mutationKey: [EVENTS_QUERY_KEY, "register", eventCode],
-        mutationFn: () => registerEvent(eventCode),
+export const useRegisterEvent = () => {
+    const queryClient = useQueryClient()
+    return useMutation<RegisterEventResponse, Error, string>({
+        mutationKey: [EVENTS_QUERY_KEY, "register"],
+        mutationFn: (eventCode: string) => registerEvent(eventCode),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [EVENTS_QUERY_KEY],
+            })
+        },
     })
 }
 

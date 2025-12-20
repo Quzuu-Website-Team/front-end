@@ -18,7 +18,7 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
-import { usePostJoinAcademy } from "@/lib/queries/academy"
+import { useRegisterEvent } from "@/lib/queries/events"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import React, { useState } from "react"
@@ -35,9 +35,9 @@ const FormSchema = z.object({
         }),
 })
 
-export default function RegisterPrivateAcademy() {
+export default function RegisterPrivateEvent() {
     const [openRegisterDialog, setOpenRegisterDialog] = useState(false)
-    const { mutate: registerAcademy, isPending } = usePostJoinAcademy()
+    const { mutate: registerEvent, isPending } = useRegisterEvent()
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -46,13 +46,12 @@ export default function RegisterPrivateAcademy() {
         },
     })
 
-    const onRegisterAcademy = (data: z.infer<typeof FormSchema>) => {
-        registerAcademy(data.code, {
+    const onRegisterEvent = (data: z.infer<typeof FormSchema>) => {
+        registerEvent(data.code, {
             onSuccess: () => {
                 toast({
                     title: "Enrollment Successful",
-                    description:
-                        "You have successfully joined the class. Happy learning!",
+                    description: "You have successfully joined the event.",
                     variant: "success",
                 })
                 setOpenRegisterDialog(false)
@@ -79,7 +78,7 @@ export default function RegisterPrivateAcademy() {
                 className="w-full"
                 onClick={() => setOpenRegisterDialog(true)}
             >
-                Enroll Private Learning
+                Enroll Private Event
             </Button>
 
             <Dialog
@@ -96,15 +95,15 @@ export default function RegisterPrivateAcademy() {
                     preventClose={isPending}
                 >
                     <DialogHeader>
-                        <DialogTitle>Enroll Private Learning</DialogTitle>
+                        <DialogTitle>Enroll Private Event</DialogTitle>
                         <DialogDescription>
-                            Please fill the Code to enroll a private learning.
+                            Please fill the Code to enroll a private event.
                         </DialogDescription>
                     </DialogHeader>
 
                     <Form {...form}>
                         <form
-                            onSubmit={form.handleSubmit(onRegisterAcademy)}
+                            onSubmit={form.handleSubmit(onRegisterEvent)}
                             className="space-y-6"
                         >
                             <FormField
@@ -116,7 +115,7 @@ export default function RegisterPrivateAcademy() {
                                             <Input
                                                 placeholder="Enter access code"
                                                 type="text"
-                                                aria-label="Academy Access Code"
+                                                aria-label="Event Access Code"
                                                 required
                                                 {...field}
                                             />

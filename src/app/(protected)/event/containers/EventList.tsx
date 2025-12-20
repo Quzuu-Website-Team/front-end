@@ -7,6 +7,7 @@ import EmptyEventList from "./EmptyEventList"
 import GenericListView, { SortOption } from "@/components/list/GenericListView"
 import { useListParams } from "@/hooks/use-list-params"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useMemo, useState } from "react"
 
 const sortOptions: SortOption[] = [
     {
@@ -46,6 +47,7 @@ export default function EventList() {
     const {
         data,
         isLoading: loadingListEvent,
+        isRefetching: refetchingListEvent,
         isError,
     } = useGetListEvent({
         page,
@@ -55,7 +57,15 @@ export default function EventList() {
         registerStatus,
     })
 
-    const listEvent = data?.data
+    const [isInitialLoading, setIsInitialLoading] = useState(false)
+
+    useEffect(() => {
+        if (!loadingListEvent && isInitialLoading) {
+            setIsInitialLoading(false)
+        }
+    }, [loadingListEvent, isInitialLoading])
+
+    const listEvent = useMemo(() => data?.data || [], [data])
 
     const handleSortChange = (newSortBy: string, newOrder: "asc" | "desc") => {
         setSortAndOrder(newSortBy, newOrder)
@@ -88,7 +98,7 @@ export default function EventList() {
         >
             <TabsList className="bg-slate-200">
                 <TabsTrigger value="">All Events</TabsTrigger>
-                <TabsTrigger value="True">My Events</TabsTrigger>
+                <TabsTrigger value="1">My Events</TabsTrigger>
             </TabsList>
         </Tabs>
     )
@@ -109,12 +119,15 @@ export default function EventList() {
             currentPage={data?.currentPage || 1}
             totalPages={data?.totalPages || 1}
             onPageChange={setPage}
-            isLoading={loadingListEvent}
+            isLoading={loadingListEvent || refetchingListEvent}
+            isInitialLoading={isInitialLoading}
             isEmpty={!listEvent?.length}
             emptyState={<EmptyEventList />}
             additionalFilters={tabsFilter}
         >
-            {loadingListEvent ? loadingSkeleton : eventGrid}
+            {loadingListEvent || refetchingListEvent
+                ? loadingSkeleton
+                : eventGrid}
         </GenericListView>
     )
 }
