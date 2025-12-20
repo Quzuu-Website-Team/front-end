@@ -57,7 +57,7 @@ export default function EventList() {
         registerStatus,
     })
 
-    const [isInitialLoading, setIsInitialLoading] = useState(false)
+    const [isInitialLoading, setIsInitialLoading] = useState(true)
 
     useEffect(() => {
         if (!loadingListEvent && isInitialLoading) {

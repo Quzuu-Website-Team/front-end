@@ -59,7 +59,7 @@ export default function AcademyList() {
         registerStatus,
     })
 
-    const [isInitialLoading, setIsInitialLoading] = useState(false)
+    const [isInitialLoading, setIsInitialLoading] = useState(true)
 
     useEffect(() => {
         if (!loadingListAcademy && isInitialLoading) {
