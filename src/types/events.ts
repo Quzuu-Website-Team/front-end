@@ -1,4 +1,4 @@
-import { ListData } from "./common"
+import { ListData, ListDataResponse } from "./common"
 
 export interface EventData {
     id_event: string
@@ -13,9 +13,7 @@ export interface EventData {
     register_status?: boolean
 }
 
-export interface EventListResponse extends ListData<EventData> {
-    data: EventData[]
-}
+export interface EventListResponse extends ListDataResponse<EventData> {}
 
 export interface EventDetailResponse {
     data: {
@@ -28,3 +26,6 @@ export interface RegisterEventResponse extends EventDetailResponse {
     message: string
     success: boolean
 }
+
+// Query result with pagination
+export interface EventListResult extends ListData<EventData> {}

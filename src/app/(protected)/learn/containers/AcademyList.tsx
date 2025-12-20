@@ -6,80 +6,128 @@ import { useGetListAcademy } from "@/lib/queries/academy"
 import EmptyAcademyList from "./EmptyList"
 import AcademyListError from "./AcademyListError"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo } from "react"
 import EmptyMyAcademyList from "./EmptyMyAcademyList"
+import GenericListView, { SortOption } from "@/components/list/GenericListView"
+import { useListParams } from "@/hooks/use-list-params"
+
+const sortOptions: SortOption[] = [
+    {
+        label: "Terbaru",
+        value: { sortBy: "created_at", order: "desc" },
+    },
+    {
+        label: "Terlama",
+        value: { sortBy: "created_at", order: "asc" },
+    },
+    {
+        label: "Judul A-Z",
+        value: { sortBy: "title", order: "asc" },
+    },
+    {
+        label: "Judul Z-A",
+        value: { sortBy: "title", order: "desc" },
+    },
+]
 
 export default function AcademyList() {
     const {
-        data: listAcademy,
+        page,
+        search,
+        sort: sortBy,
+        order,
+        setSearch,
+        setSortAndOrder,
+        setPage,
+        registerStatus,
+        setRegisterStatus,
+    } = useListParams({
+        defaultSortBy: "created_at",
+        defaultOrder: "desc",
+    })
+
+    const {
+        data,
         isLoading: loadingListAcademy,
         isRefetching: refetchingListAcademy,
         isError,
-    } = useGetListAcademy()
+    } = useGetListAcademy({
+        page,
+        search: search,
+        sortBy,
+        order: order as "asc" | "desc",
+        registerStatus,
+    })
 
-    const [filter, setFilter] = useState<"all" | "my">("all")
+    const listAcademy = useMemo(() => data?.data || [], [data])
 
-    const filteredAcademy = useMemo(
-        () =>
-            listAcademy?.filter((academy) => {
-                if (filter === "my") {
-                    return !!academy.register_status
-                }
-                return true
-            }) ?? [],
-        [listAcademy, filter],
-    )
+    const handleSortChange = (newSortBy: string, newOrder: "asc" | "desc") => {
+        setSortAndOrder(newSortBy, newOrder)
+    }
 
-    const renderList = useCallback(() => {
-        if (isError) {
-            return <AcademyListError />
-        }
-
-        if (!listAcademy?.length) {
-            return <EmptyAcademyList />
-        }
-
-        if (!filteredAcademy?.length) {
-            return <EmptyMyAcademyList />
-        }
-
-        return (
+    // Loading skeleton
+    const loadingSkeleton = (
+        <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredAcademy.map((academy) => (
-                    <AcademyCard key={academy.id} academy={academy} />
+                {Array.from({ length: 8 }).map((_, index) => (
+                    <AcademyCardSkeleton key={`academy-skeleton-${index}`} />
                 ))}
             </div>
-        )
-    }, [isError, listAcademy, filteredAcademy])
+        </div>
+    )
 
-    if (loadingListAcademy || refetchingListAcademy) {
-        return (
-            <div className="space-y-4">
-                <div className="h-10 w-60 rounded-md bg-slate-200 mb-2 mx-auto"></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                        <AcademyCardSkeleton
-                            key={`academy-skeleton-${index}`}
-                        />
-                    ))}
-                </div>
-            </div>
-        )
+    // Academy grid content
+    const academyGrid = (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {listAcademy.map((academy) => (
+                <AcademyCard key={academy.id} academy={academy} />
+            ))}
+        </div>
+    )
+
+    // Tabs for filtering
+    const tabsFilter = (
+        <Tabs
+            defaultValue="all"
+            value={registerStatus}
+            onValueChange={setRegisterStatus}
+        >
+            <TabsList className="bg-slate-200">
+                <TabsTrigger value="">All Available</TabsTrigger>
+                <TabsTrigger value="True">My Academies</TabsTrigger>
+            </TabsList>
+        </Tabs>
+    )
+
+    // Determine empty state
+    const getEmptyState = () => {
+        if (isError) return <AcademyListError />
+        if (!listAcademy?.length && registerStatus === "True")
+            return <EmptyMyAcademyList />
+        if (!listAcademy?.length) return <EmptyAcademyList />
+        return null
     }
 
     return (
-        <div className="space-y-4">
-            <Tabs
-                defaultValue="all"
-                className="flex justify-center"
-                onValueChange={(value) => setFilter(value as "all" | "my")}
-            >
-                <TabsList className="bg-slate-200">
-                    <TabsTrigger value="all">All Available</TabsTrigger>
-                    <TabsTrigger value="my">My Academies</TabsTrigger>
-                </TabsList>
-            </Tabs>
-            {renderList()}
-        </div>
+        <GenericListView
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search academies..."
+            sortOptions={sortOptions}
+            currentSortBy={sortBy}
+            currentOrder={order as "asc" | "desc"}
+            onSortChange={handleSortChange}
+            currentPage={data?.currentPage || 1}
+            totalPages={data?.totalPages || 1}
+            onPageChange={setPage}
+            isLoading={loadingListAcademy || refetchingListAcademy}
+            isEmpty={!listAcademy?.length || isError}
+            emptyState={getEmptyState()}
+            additionalFilters={tabsFilter}
+        >
+            {loadingListAcademy || refetchingListAcademy
+                ? loadingSkeleton
+                : academyGrid}
+        </GenericListView>
     )
 }

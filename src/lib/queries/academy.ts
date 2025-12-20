@@ -2,6 +2,7 @@ import {
     Academy,
     AcademyDetailResponse,
     AcademyListResponse,
+    AcademyListResult,
     AcademyMaterialContent,
     AcademyMaterialContentResponse,
 } from "@/types/academy"
@@ -17,8 +18,28 @@ import {
 
 export const ACADEMY_QUERY_KEY = "academy"
 
-const getListAcademy = async (): Promise<AcademyListResponse> => {
-    const response = await api.get<AcademyListResponse>("/academy")
+interface ListAcademyParams {
+    page?: number
+    search?: string
+    sortBy?: string
+    order?: "asc" | "desc"
+    registerStatus?: string
+}
+
+const getListAcademy = async ({
+    page = 1,
+    search,
+    sortBy,
+    order,
+    registerStatus,
+}: ListAcademyParams = {}): Promise<AcademyListResponse> => {
+    const params: any = { page }
+    if (search) params.search = search
+    if (sortBy) params.sortBy = sortBy
+    if (order) params.order = order
+    if (registerStatus) params.registerStatus = registerStatus
+
+    const response = await api.get<AcademyListResponse>("/academy", { params })
     return response.data
 }
 
@@ -107,11 +128,16 @@ const postSubmitAcademyExam = async (
     return response.data
 }
 
-export const useGetListAcademy = () => {
-    return useQuery<AcademyListResponse, Error, Academy[]>({
-        queryKey: [ACADEMY_QUERY_KEY, "list"],
-        queryFn: getListAcademy,
-        select: (response) => response.data,
+export const useGetListAcademy = (params: ListAcademyParams = {}) => {
+    return useQuery<AcademyListResponse, Error, AcademyListResult>({
+        queryKey: [ACADEMY_QUERY_KEY, "list", ...Object.values(params)],
+        queryFn: () => getListAcademy(params),
+        select: (response) => ({
+            data: response.data,
+            currentPage: response.meta_data.currentPage,
+            totalItems: response.meta_data.totalItems,
+            totalPages: response.meta_data.totalPages,
+        }),
     })
 }
 
