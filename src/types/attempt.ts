@@ -1,9 +1,10 @@
 export type QuestionType =
-    | "choice"
     | "multiple_choices"
-    | "true_false_choice"
+    | "multiple_choices_complex"
+    | "true_false"
     | "short_answer"
     | "code_puzzle"
+    | "code_type"
     | "competitive_programming"
     | "upload_file"
 
