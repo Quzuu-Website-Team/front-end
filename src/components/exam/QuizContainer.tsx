@@ -118,9 +118,9 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
             }
 
             switch (question.type) {
-                case "choice":
-                    return <RadioAnswer {...commonProps} />
                 case "multiple_choices":
+                    return <RadioAnswer {...commonProps} />
+                case "multiple_choices_complex":
                     return <CheckboxAnswer {...commonProps} />
                 case "short_answer":
                     return <ShortAnswer {...commonProps} />
@@ -129,6 +129,8 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
                         return <ClickChipAnswer {...commonProps} />
                     }
                     return <CodeShortAnswer {...commonProps} />
+                case "code_type":
+                    return <CodeShortAnswer {...commonProps} />
                 case "upload_file":
                     return (
                         <FileAnswer
@@ -136,7 +138,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
                             isUploading={isFileUploading}
                         />
                     )
-                case "true_false_choice":
+                case "true_false":
                     return <TrueFalseAnswer {...commonProps} />
                 case "competitive_programming":
                     return (
