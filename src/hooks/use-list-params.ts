@@ -20,6 +20,7 @@ export const useListParams = (options?: UseListParamsOptions) => {
     const sort = searchParams.get("sortBy") || defaultSortBy
     const order = searchParams.get("order") || defaultOrder
     const registerStatus = searchParams.get("registerStatus") || ""
+    const eventStatus = searchParams.get("eventStatus") || ""
 
     // Helper for update URL without refresh
     const setParam = useCallback(
@@ -57,9 +58,11 @@ export const useListParams = (options?: UseListParamsOptions) => {
         sort,
         order,
         registerStatus,
+        eventStatus,
         setSortAndOrder,
         setPage: (val: number) => setParam("page", val),
         setSearch: (val: string) => setParam("search", val),
         setRegisterStatus: (val: string) => setParam("registerStatus", val),
+        setEventStatus: (val: string) => setParam("eventStatus", val),
     }
 }

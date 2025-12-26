@@ -150,7 +150,7 @@ export default function GenericListView({
 
                     {/* Additional Filters (like Tabs) */}
                     {additionalFilters && (
-                        <div className="flex justify-center max-md:order-2">
+                        <div className="flex justify-center gap-6 max-md:flex-wrap max-md:order-2 w-full flex-1">
                             {isInitialLoading ? (
                                 <div className="h-10 w-60 rounded-md bg-slate-200 mb-2 mx-auto"></div>
                             ) : (
