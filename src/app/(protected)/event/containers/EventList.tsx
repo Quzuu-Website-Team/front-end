@@ -8,24 +8,38 @@ import GenericListView, { SortOption } from "@/components/list/GenericListView"
 import { useListParams } from "@/hooks/use-list-params"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect, useMemo, useState } from "react"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const sortOptions: SortOption[] = [
     {
-        label: "Terbaru",
+        label: "Newest",
         value: { sortBy: "start_event", order: "desc" },
     },
     {
-        label: "Terlama",
+        label: "Oldest",
         value: { sortBy: "start_event", order: "asc" },
     },
     {
-        label: "Judul A-Z",
+        label: "Title A-Z",
         value: { sortBy: "title", order: "asc" },
     },
     {
-        label: "Judul Z-A",
+        label: "Title Z-A",
         value: { sortBy: "title", order: "desc" },
     },
+]
+
+const eventStatusOptions = [
+    { label: "All Status", value: undefined },
+    { label: "Upcoming", value: "UPCOMING" },
+    { label: "Ongoing", value: "ONGOING" },
+    { label: "Ended", value: "ENDED" },
 ]
 
 export default function EventList() {
@@ -34,6 +48,8 @@ export default function EventList() {
         search,
         sort: sortBy,
         order,
+        eventStatus,
+        setEventStatus,
         setSearch,
         setSortAndOrder,
         setPage,
@@ -55,6 +71,7 @@ export default function EventList() {
         sortBy,
         order: order as "asc" | "desc",
         registerStatus,
+        eventStatus,
     })
 
     const [isInitialLoading, setIsInitialLoading] = useState(true)
@@ -89,18 +106,58 @@ export default function EventList() {
         </div>
     )
 
+    const currentEventStatus = useMemo(
+        () =>
+            eventStatusOptions.find((opt) => opt.value === eventStatus) ||
+            eventStatusOptions[0],
+        [eventStatus],
+    )
+
+    const handleEventStatusChange = (value: string) => {
+        const selectedOption = eventStatusOptions.find(
+            (opt) => opt.value === value,
+        )
+        if (selectedOption) {
+            setEventStatus(selectedOption.value!!)
+        }
+    }
+
     // Tabs for filtering
-    const tabsFilter = (
-        <Tabs
-            defaultValue="all"
-            value={registerStatus}
-            onValueChange={setRegisterStatus}
-        >
-            <TabsList className="bg-slate-200">
-                <TabsTrigger value="">All Events</TabsTrigger>
-                <TabsTrigger value="1">My Events</TabsTrigger>
-            </TabsList>
-        </Tabs>
+    const eventFilters = (
+        <>
+            <Select
+                value={currentEventStatus.value}
+                onValueChange={handleEventStatusChange}
+                name="eventStatus"
+            >
+                <SelectTrigger
+                    value={currentEventStatus.value}
+                    className="bg-white sm:min-w-40 max-sm:w-full sm:w-fit"
+                >
+                    <SelectValue placeholder="" />
+                </SelectTrigger>
+                <SelectContent>
+                    {eventStatusOptions.map((option) => (
+                        <SelectItem
+                            key={option.label}
+                            value={option.value as string}
+                        >
+                            {option.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+            <Tabs
+                defaultValue="all"
+                value={registerStatus}
+                onValueChange={setRegisterStatus}
+            >
+                <TabsList className="bg-slate-200">
+                    <TabsTrigger value="">All Events</TabsTrigger>
+                    <TabsTrigger value="1">My Events</TabsTrigger>
+                </TabsList>
+            </Tabs>
+        </>
     )
 
     if (isError) {
@@ -108,26 +165,28 @@ export default function EventList() {
     }
 
     return (
-        <GenericListView
-            searchValue={search}
-            onSearchChange={setSearch}
-            searchPlaceholder="Search events..."
-            sortOptions={sortOptions}
-            currentSortBy={sortBy}
-            currentOrder={order as "asc" | "desc"}
-            onSortChange={handleSortChange}
-            currentPage={data?.currentPage || 1}
-            totalPages={data?.totalPages || 1}
-            onPageChange={setPage}
-            isLoading={loadingListEvent || refetchingListEvent}
-            isInitialLoading={isInitialLoading}
-            isEmpty={!listEvent?.length}
-            emptyState={<EmptyEventList />}
-            additionalFilters={tabsFilter}
-        >
-            {loadingListEvent || refetchingListEvent
-                ? loadingSkeleton
-                : eventGrid}
-        </GenericListView>
+        <>
+            <GenericListView
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search events..."
+                sortOptions={sortOptions}
+                currentSortBy={sortBy}
+                currentOrder={order as "asc" | "desc"}
+                onSortChange={handleSortChange}
+                currentPage={data?.currentPage || 1}
+                totalPages={data?.totalPages || 1}
+                onPageChange={setPage}
+                isLoading={loadingListEvent || refetchingListEvent}
+                isInitialLoading={isInitialLoading}
+                isEmpty={!listEvent?.length}
+                emptyState={<EmptyEventList />}
+                additionalFilters={eventFilters}
+            >
+                {loadingListEvent || refetchingListEvent
+                    ? loadingSkeleton
+                    : eventGrid}
+            </GenericListView>
+        </>
     )
 }

@@ -13,19 +13,19 @@ import { useListParams } from "@/hooks/use-list-params"
 
 const sortOptions: SortOption[] = [
     {
-        label: "Terbaru",
+        label: "Newest",
         value: { sortBy: "created_at", order: "desc" },
     },
     {
-        label: "Terlama",
+        label: "Oldest",
         value: { sortBy: "created_at", order: "asc" },
     },
     {
-        label: "Judul A-Z",
+        label: "Title A-Z",
         value: { sortBy: "title", order: "asc" },
     },
     {
-        label: "Judul Z-A",
+        label: "Title Z-A",
         value: { sortBy: "title", order: "desc" },
     },
 ]

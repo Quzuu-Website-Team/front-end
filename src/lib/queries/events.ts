@@ -26,6 +26,7 @@ interface ListEventParams {
     sortBy?: string
     order?: "asc" | "desc"
     registerStatus?: string
+    eventStatus?: string
 }
 
 const getListEvent = async ({
@@ -34,12 +35,14 @@ const getListEvent = async ({
     sortBy,
     order,
     registerStatus,
+    eventStatus,
 }: ListEventParams = {}): Promise<EventListResponse> => {
     const params: any = { page }
     if (search) params.search = search
     if (sortBy) params.sortBy = sortBy
     if (order) params.order = order
     if (registerStatus) params.registerStatus = registerStatus
+    if (eventStatus) params.status = eventStatus
 
     const response = await api.get<EventListResponse>("/events", { params })
     return response.data
