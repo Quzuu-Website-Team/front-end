@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import Countdown from "@/components/Countdown"
 import { ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Question } from "@/types/attempt"
+import { AttemptScore, Question } from "@/types/attempt"
 import SubmitConfirmDialog from "./SubmitConfirmDialog"
 import ClarificationDialog from "./ClarificationDialog"
+import { CircularProgress } from "../ui/circular-progress"
 
 type UserAnswers = Record<string, string[]>
 
@@ -23,6 +24,7 @@ type NavQuizProps = {
     remainingTime?: number
     showRemainingTime?: boolean
     isSubmitting?: boolean
+    attemptScore?: AttemptScore
 }
 
 type QuestionButtonProps = {
@@ -55,6 +57,7 @@ QuestionButton.displayName = "QuestionButton"
 const NavQuiz: React.FC<NavQuizProps> = ({
     totalQuestions,
     basePath,
+    attemptScore,
     isReviewMode = false,
     onSubmitAnswers,
     userAnswers = {},
@@ -135,6 +138,24 @@ const NavQuiz: React.FC<NavQuizProps> = ({
 
     return (
         <div className="bg-white pt-4 pb-6 px-6 rounded-3xl text-slate-800 shadow flex flex-col gap-6">
+            {isReviewMode && attemptScore && (
+                <div className="px-6 flex flex-col gap-4">
+                    <h3 className="text-xl font-semibold text-foreground/80 mb-1">
+                        Your Score: {attemptScore.score} /{" "}
+                        <span className="text-foreground/80">
+                            {attemptScore.max_score}
+                        </span>
+                    </h3>
+                    <CircularProgress
+                        className="h-40 text-2xl"
+                        variant="primary"
+                        progress={
+                            (attemptScore.score / attemptScore.max_score) * 100
+                        }
+                        showLabel
+                    />
+                </div>
+            )}
             {showRemainingTime && remainingTimeInSeconds !== undefined ? (
                 <div className="timer px-6">
                     <h3 className="text-xl font-semibold text-foreground/80 mb-1">

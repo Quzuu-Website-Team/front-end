@@ -26,7 +26,7 @@ export interface CodePart {
  */
 export function parseQuestionContent(content: string): ParsedQuestion {
     // Split by \n$$$\n untuk pisahkan instruksi dan kode
-    const [instructionRaw, ...codeRaw] = content.split(/\n\$\$\$\n/)
+    const [instructionRaw, ...codeRaw] = content.split(/\$\$\$/)
 
     const instruction = instructionRaw?.trim() || ""
     const codeContent = codeRaw.join("\n$$$\n")
@@ -34,6 +34,9 @@ export function parseQuestionContent(content: string): ParsedQuestion {
     // Parse code blocks dengan //code// markers
     // Keluarkan backticks jika ada, tapi JANGAN trim leading whitespace
     let cleanedCode = codeContent.replace(/^`\n?|`\n?$/g, "")
+
+    // Fix new line formatting
+    cleanedCode = cleanedCode.replace(/\\n/g, "\n")
 
     // Trim hanya leading/trailing newlines, bukan spaces
     cleanedCode = cleanedCode.replace(/^\n+|\n+$/g, "")

@@ -85,14 +85,11 @@ const EventExam: React.FC<QuizContainerWrapperProps> = ({
                 })
             }
 
-            console.log("Attempt Answers Map:", answersMap)
-
             attempt.questions.forEach((q) => {
                 // Use answer from attempt.answers if available, otherwise use current_answer
                 initialized[q.id_question] =
                     answersMap[q.id_question] ?? q.current_answer ?? []
             })
-            console.log("Initialized User Answers:", initialized)
             setUserAnswers(initialized)
             setIsReviewMode(attempt.submitted)
 

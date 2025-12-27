@@ -343,9 +343,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
     return (
         <div className="flex flex-col space-y-4">
             {parsed.instruction && (
-                <div className="text-sm text-slate-700 bg-slate-50 p-3 rounded border border-slate-200">
-                    {parsed.instruction}
-                </div>
+                <div className="text-base">{parsed.instruction}</div>
             )}
 
             <div className="code-display py-6 px-4 bg-slate-950 text-white rounded-md font-mono text-sm">
