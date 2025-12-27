@@ -78,17 +78,26 @@ const CheckboxAnswer: React.FC<CheckboxAnswerProps> = ({
 }) => {
     const [localSelected, setLocalSelected] = useState<string[]>([])
 
+    const [lastQuestionId, setLastQuestionId] = useState<string>("")
     // Sync state when question or answer changes
     useEffect(() => {
-        const answer = question.current_answer || []
+        if (question.id_question !== lastQuestionId || isReviewMode) {
+            const answer = question.current_answer || []
 
-        // Convert binary format ['0','1','0','1'] to char labels ['B','D']
-        const convertedAnswer = answer
-            .map((val, idx) => (val === "1" ? CHAR_LABELS[idx] : null))
-            .filter((char): char is string => char !== null)
+            // Convert binary format ['0','1','0','1'] to char labels ['B','D']
+            const convertedAnswer = answer
+                .map((val, idx) => (val === "1" ? CHAR_LABELS[idx] : null))
+                .filter((char): char is string => char !== null)
 
-        setLocalSelected(convertedAnswer)
-    }, [question.id_question, question.current_answer])
+            setLocalSelected(convertedAnswer)
+            setLastQuestionId(question.id_question)
+        }
+    }, [
+        question.id_question,
+        question.current_answer,
+        lastQuestionId,
+        isReviewMode,
+    ])
 
     const selectedSet = useMemo(() => new Set(localSelected), [localSelected])
 
