@@ -11,6 +11,8 @@ import WelcomingContent from "./WelcomingContent"
 import { UseMutationResult } from "@tanstack/react-query"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { toast } from "@/hooks/use-toast"
 
 interface MaterialContentProps {
     academyDetail?: Academy
@@ -28,7 +30,11 @@ export default function MaterialContent({
 }: MaterialContentProps) {
     const sanitizeContent = (content?: string) => {
         if (!content) return ""
-        return DOMPurify.sanitize(content)
+        return DOMPurify.sanitize(content, {
+            USE_PROFILES: { html: true },
+            ADD_ATTR: ["id", "class", "data-exam-slug"],
+            ADD_TAGS: ["button"],
+        })
     }
 
     const academyMaterial = useMemo(
@@ -39,6 +45,33 @@ export default function MaterialContent({
             ),
         [academyDetail, academyMaterialContent],
     )
+
+    const router = useRouter()
+    const handleStartQuiz = (e: React.MouseEvent<HTMLDivElement>) => {
+        const target = e.target as HTMLElement
+
+        const quizButton = target.closest(
+            "#btn-start-quiz-action",
+        ) as HTMLElement | null
+
+        if (quizButton) {
+            e.preventDefault()
+            const slug = quizButton.dataset.examSlug
+
+            if (!slug) {
+                toast({
+                    title: "Quiz Not Available",
+                    description:
+                        "We're sorry, but the quiz for this material is currently unavailable. Please try again later or contact support if the issue persists.",
+                    variant: "destructive",
+                })
+                return
+            }
+
+            // Navigate to academy exam page
+            router.push(`/learn/${academyDetail?.slug}/exam/${slug}`)
+        }
+    }
 
     if (isLoading) {
         return <MaterialContentLoading />
@@ -89,6 +122,7 @@ export default function MaterialContent({
                     </CardTitle>
                     <div
                         className="prose prose-slate"
+                        onClick={handleStartQuiz}
                         dangerouslySetInnerHTML={{
                             __html: sanitizeContent(
                                 academyMaterialContent.contents,

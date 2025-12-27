@@ -66,6 +66,23 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
     const numberPage = searchParams.get("num")
     const currentNumber = numberPage ? parseInt(numberPage, 10) : 1
 
+    const attemptScore = useMemo(() => {
+        if (!isReviewMode) return undefined
+
+        const totalScore =
+            attempt?.answers.reduce((acc, answer) => acc + answer.score, 0) || 0
+        const maxScore =
+            attempt?.questions.reduce(
+                (acc, question) => acc + (question.corr_mark || 0),
+                0,
+            ) || 0
+
+        return {
+            score: totalScore,
+            max_score: maxScore,
+        }
+    }, [attempt, isReviewMode])
+
     const allowNavigationRef = useRef(false)
 
     const currentQuestion = useMemo(() => {
@@ -177,6 +194,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
                 questions={attempt?.questions || []}
                 remainingTime={attempt?.remaining_time}
                 showRemainingTime={showRemainingTime && !attempt?.submitted}
+                attemptScore={attemptScore}
             />
 
             <div className="display-quiz col-span-2 bg-white p-9 rounded-3xl text-slate-800 shadow flex flex-col gap-4">
@@ -206,6 +224,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({
                 </div>
 
                 {currentQuestion.type !== "code_puzzle" &&
+                    currentQuestion.type !== "code_type" &&
                     currentQuestion.type !== "competitive_programming" && (
                         <p className="text-base">{currentQuestion.question}</p>
                     )}

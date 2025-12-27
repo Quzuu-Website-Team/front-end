@@ -17,6 +17,11 @@ export interface CodeMetadata {
     memory: number
 }
 
+export interface AttemptScore {
+    score: number
+    max_score: number
+}
+
 export interface Question {
     id_question: string
     type: QuestionType
@@ -24,6 +29,7 @@ export interface Question {
     options: string[]
     current_answer: string[]
     ans_key: string[] | null
+    corr_mark: number | null
 }
 
 export interface AttemptAnswer {
