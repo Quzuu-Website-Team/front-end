@@ -115,7 +115,7 @@ const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
 
     // Add effect to sync when question changes
     useEffect(() => {
-        if (question.id_question !== lastQuestionId) {
+        if (question.id_question !== lastQuestionId || isReviewMode) {
             // Convert binary format ['0','1','0','1'] to number array [0,1,0,1]
             const answer = question.current_answer || []
             let parsedAnswer: number[] = Array(optionCount).fill(-1)
@@ -135,6 +135,7 @@ const TrueFalseAnswer: React.FC<TrueFalseAnswerProps> = ({
         question.current_answer,
         optionCount,
         lastQuestionId,
+        isReviewMode,
     ])
 
     // Parse correct answers to array format

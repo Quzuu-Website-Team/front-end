@@ -77,6 +77,13 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
     isReviewMode = false,
     onAnswerChange,
 }) => {
+    // Helper function to convert answer to char
+    const getSelectedChar = (answer: string[]) => {
+        if (!answer || answer.length === 0) return ""
+        const selectedIndex = answer.findIndex((val) => val === "1")
+        return selectedIndex >= 0 ? CHAR_LABELS[selectedIndex] : ""
+    }
+
     const [localSelected, setLocalSelected] = useState<string>(() =>
         question.current_answer ? question.current_answer[0] : "",
     )
@@ -84,15 +91,10 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
     const [lastQuestionId, setLastQuestionId] = useState<string>("")
 
     useEffect(() => {
-        if (question.id_question !== lastQuestionId) {
+        if (question.id_question !== lastQuestionId || isReviewMode) {
             // Convert binary format ['0','1','0','0'] to char label 'B'
             const answer = question.current_answer || []
-            let selectedChar = ""
-            if (answer.length > 0) {
-                const selectedIndex = answer.findIndex((val) => val === "1")
-                selectedChar =
-                    selectedIndex >= 0 ? CHAR_LABELS[selectedIndex] : ""
-            }
+            let selectedChar = getSelectedChar(answer)
 
             setLocalSelected(selectedChar)
             setLastQuestionId(question.id_question)
@@ -100,8 +102,8 @@ const RadioAnswer: React.FC<RadioAnswerProps> = ({
     }, [
         question.id_question,
         question.current_answer,
-        question.options,
         lastQuestionId,
+        isReviewMode,
     ])
 
     const handleSelect = useCallback(

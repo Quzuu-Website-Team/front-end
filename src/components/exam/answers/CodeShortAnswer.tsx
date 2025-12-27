@@ -146,7 +146,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
 
     // Only sync when question actually changes (new question), not on every userSelected change
     useEffect(() => {
-        if (question.id_question !== lastQuestionId) {
+        if (question.id_question !== lastQuestionId || isReviewMode) {
             setAnswers(userSelected)
             setLastQuestionId(question.id_question)
         }
@@ -155,6 +155,7 @@ const CodeShortAnswer: React.FC<CodeShortAnswerProps> = ({
         userSelected,
         question.current_answer,
         lastQuestionId,
+        isReviewMode,
     ])
 
     const handleChange = useCallback(

@@ -191,7 +191,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
 
     // Only sync when question actually changes (new question), not on every userSelected change
     useEffect(() => {
-        if (question.id_question !== lastQuestionId) {
+        if (question.id_question !== lastQuestionId || isReviewMode) {
             const updated: Record<number, string> = {}
             userSelected.forEach((chip, idx) => {
                 // Only add non-empty chips (ignore empty strings from previous conversion)
@@ -202,7 +202,7 @@ const ClickChipAnswer: React.FC<ClickChipAnswerProps> = ({
             setSelectedChips(updated)
             setLastQuestionId(question.id_question)
         }
-    }, [question.id_question, userSelected, lastQuestionId])
+    }, [question.id_question, userSelected, lastQuestionId, isReviewMode])
 
     const blankCount = parsed ? getBlankCount(parsed.codeBlocks) : 0
     const selectedCount = Object.keys(selectedChips).length
